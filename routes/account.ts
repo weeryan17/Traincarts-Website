@@ -71,7 +71,7 @@ router.get('/discord/callback', function(req : any, res : any, next : any) {
             res.redirect('/account/login');
             return;
         }
-        //TODO insert user
+        //TODO insert user discord details
         console.log(req.user.id);
     })(req, res, next);
 });
