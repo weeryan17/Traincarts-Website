@@ -6,6 +6,7 @@ $(document).ready(function () {
     });
 
     $.fn.animateText = function (newText, time = 500) {
+        //TODO improve this so it creates the ts-text element without me needing to make it myself
         var originalText = this.find(".ts-text").text();
         var chars = originalText.length + newText.length;
         var timeInterval = time/chars;

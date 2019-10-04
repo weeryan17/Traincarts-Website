@@ -1,4 +1,5 @@
 var passport = global.passport;
+var bcrypt = require('bcrypt');
 var express = require('express');
 var router = express.Router();
 router.get("/", function (req, res) {
@@ -11,21 +12,53 @@ router.post("/login", passport.authenticate('local', {
     successRedirect: '/',
     failureRedirect: '/login'
 }));
-router.post("/singup", function (req, res) {
-    res.send("WIP");
+router.post("/signup", function (req, res) {
+    console.log(req.body);
+    var email = req.body.email;
+    var username = req.body.username;
+    var password = req.body.password;
+    global.pool.getConnection(function (err, connection) {
+        if (err) {
+            console.error(err);
+            res.redirect('/');
+            return;
+        }
+        bcrypt.hash(password, 10, function (err, hash) {
+            if (err) {
+                console.error(err);
+                res.redirect('/');
+                return;
+            }
+            connection.query("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", [username, email, hash], function (err, results) {
+                if (err) {
+                    console.error(err);
+                    res.redirect('/');
+                    return;
+                }
+                res.redirect('/');
+            });
+        });
+    });
 });
-router.get('/discord', passport.authenticate('discord'));
-router.get('/discord/callback', function (req, res) {
+router.get('/discord', passport.authenticate('discord', { scope: "identify" }));
+router.get('/discord/callback', function (req, res, next) {
+    console.log("Discord - router");
     passport.authenticate('discord', function (err, user, info) {
         if (err) {
             console.error(err);
             res.redirect('/');
+            return;
         }
         if (!user) {
             res.redirect("/account/discord");
+            return;
         }
-        console.log(req.session);
-    });
+        if (!req.user) {
+            res.redirect('/account/login');
+            return;
+        }
+        console.log(req.user.id);
+    })(req, res, next);
 });
 module.exports = router;
 //# sourceMappingURL=account.js.map

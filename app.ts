@@ -10,24 +10,31 @@ var localStrategy = require("passport-local");
 var bcrypt = require('bcrypt');
 var discordStrategy = require('passport-discord').Strategy;
 
-passport.use(new localStrategy(function (username : string, password : string, done: (error: any, result?: boolean | any, data?: object) => void) {
+passport.serializeUser(function(user : any, done : any) {
+    done(null, user);
+});
+
+passport.deserializeUser(function(user : any, done : any) {
+    done(null, user);
+});
+
+passport.use(new localStrategy(function (username: string, password: string, done: (error: any, result?: boolean | any, data?: object) => void) {
 
     // @ts-ignore
-    global.pool.getConnection(function (err : any, connection : any) {
+    global.pool.getConnection(function (err: any, connection: any) {
         if (err) {
             console.error(err);
             done(err);
             return;
         }
 
-        connection.query("SELECT id, password FROM users WHERE username = ? OR email = ?", [username, username], function (error : any, results: any) {
-            if(results.length < 1) {
+        connection.query("SELECT id, password FROM users WHERE username = ? OR email = ?", [username, username], function (error: any, results: any) {
+            if (results.length < 1) {
                 done(null, false, {message: "Incorrect username."});
                 return;
             }
-
-            var user = results[1];
-            bcrypt.compare(password, user.password, function (err : any, res: any) {
+            var user = results[0];
+            bcrypt.compare(password, user.password, function (err: any, res: any) {
                 if (err) {
                     console.error(err);
                     done(err);
@@ -35,9 +42,9 @@ passport.use(new localStrategy(function (username : string, password : string, d
                 }
 
                 if (res) {
-                    done(null, user.id);
+                    done(null, { id: user.id });
                 } else {
-                    done(null, false, { message: 'Incorrect password.' });
+                    done(null, false, {message: 'Incorrect password.'});
                 }
             });
 
@@ -46,20 +53,13 @@ passport.use(new localStrategy(function (username : string, password : string, d
     });
 }));
 
-passport.use(new discordStrategy(config.discord, function (accessToken : string, refreshToken : string, profile : object, cb : any) {
-    // @ts-ignore
-    global.pool.getConnection(function (err : any, connection : any) {
-        if (err) {
-            console.error(err);
-            cb(err);
-            return;
-        }
-
-        cb(null, {
-            accessToken: accessToken,
-            refreshToken: refreshToken,
-            profile: profile
-        })
+passport.use(new discordStrategy(config.discord, function (accessToken: string, refreshToken: string, profile: object, cb: any) {
+    console.log("discord");
+    console.log(accessToken + " " + refreshToken + " " + profile);
+    cb(null, {
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        profile: profile
     });
 }));
 
@@ -81,7 +81,8 @@ app.use(express.urlencoded({extended: false}));
 app.use('/public', express.static(path.join(global.appRoot, 'public')));
 
 app.use(require('cookie-parser')());
-app.use(require('body-parser').urlencoded({ extended: true }));
+app.use(require('body-parser').urlencoded({extended: true}));
+app.use(require('express-session')({ secret: 'thing' }));
 app.use(passport.initialize());
 app.use(passport.session());
 //app.use(formidableMiddleware());
