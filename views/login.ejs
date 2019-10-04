@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <%- include(appRoot + '/templates/head.ejs'); %>
+</head>
+<body>
+<header>
+    <%- include(appRoot + '/templates/header.ejs'); %>
+    <script src="/public/js/login.js"></script>
+</header>
+<div class="container">
+    <br>
+    <h1 class="ts-primary ts-header-card">
+        <span class="ts-text">Login</span>
+    </h1>
+    <br>
+    <div class="d-flex justify-content-center">
+        <div class="ts-secondary ts-border" style="width: 50%">
+            <ul class="nav-tabs nav">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#login" id="login-button">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#signup" id="signup-button">Sign Up</a>
+                </li>
+            </ul>
+            <form id="login" action="/account/login" method="post">
+                <div class="form-group">
+                    <label for="username">Username/Email</label>
+                    <input type="text" class="form-control ts-form-item" id="username" placeholder="Username/Email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control ts-form-item" id="password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+            <form id="signup" class="ts-hidden" action="/account/signup" method="post">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control ts-form-item" id="email" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <label for="username-signup">Username</label>
+                    <input type="text" class="form-control ts-form-item" id="username-signup" placeholder="Username" required>
+                </div>
+                <br/>
+                <div class="form-group">
+                    <label for="password-signup">Password</label>
+                    <input type="password" class="form-control ts-form-item" id="password-signup" placeholder="Password" required>
+                </div>
+                <div class="form-group">
+                    <label for="password-repeat">Repeat Password</label>
+                    <input type="password" class="form-control ts-form-item" id="password-repeat" placeholder="Repeat Password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Sign Up</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
