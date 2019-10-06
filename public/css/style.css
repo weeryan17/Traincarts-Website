@@ -55,6 +55,22 @@ body {
   animation-iteration-count: infinite;
 }
 
+.dropdown-menu {
+    background-color: #212529;
+    color: white;
+}
+
+.dropdown-item {
+    background-color: #212529;
+    color: white;
+}
+
+.alert-danger {
+    background: rgb(100, 50, 50);
+    color: black;
+    border-color: red;
+}
+
 @keyframes ts-text-bar-a {
   0% {visibility: hidden}
   49% {visibility: hidden}

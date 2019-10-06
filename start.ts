@@ -12,8 +12,28 @@ var config = JSON.parse(fs.readFileSync("config.json"));
 // @ts-ignore
 global["appRoot"] = path.resolve(__dirname) + '/';
 
+var mysql_config = config.database;
+mysql_config.typeCast = function castField( field : any, useDefaultTypeCasting : any ) {
+
+    // We only want to cast bit fields that have a single-bit in them. If the field
+    // has more than one bit, then we cannot assume it is supposed to be a Boolean.
+    if ( ( field.type === "BIT" ) && ( field.length === 1 ) ) {
+
+        var bytes = field.buffer();
+
+        // A Buffer in Node represents a collection of 8-bit unsigned integers.
+        // Therefore, our single "bit field" comes back as the bits '0000 0001',
+        // which is equivalent to the number 1.
+        return( bytes[ 0 ] === 1 );
+
+    }
+
+    return( useDefaultTypeCasting() );
+
+};
+
 // @ts-ignore
-global["pool"] = mysql.createPool(config.database);
+global["pool"] = mysql.createPool(mysql_config);
 // @ts-ignore
 global["config"] = config;
 

@@ -4,7 +4,15 @@ var mysql = require('mysql');
 var fs = require('fs');
 var config = JSON.parse(fs.readFileSync("config.json"));
 global["appRoot"] = path.resolve(__dirname) + '/';
-global["pool"] = mysql.createPool(config.database);
+var mysql_config = config.database;
+mysql_config.typeCast = function castField(field, useDefaultTypeCasting) {
+    if ((field.type === "BIT") && (field.length === 1)) {
+        var bytes = field.buffer();
+        return (bytes[0] === 1);
+    }
+    return (useDefaultTypeCasting());
+};
+global["pool"] = mysql.createPool(mysql_config);
 global["config"] = config;
 var app = require('./app.js');
 var debug = require('debug')('site:server');

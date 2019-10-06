@@ -2,6 +2,8 @@
 var passport = global.passport;
 var bcrypt = require('bcrypt');
 
+var utils = require('../utils.js');
+
 // @ts-ignore
 var express = require('express');
 var router = express.Router();
@@ -11,16 +13,21 @@ router.get("/", function (req : any, res : any) {
 });
 
 router.get("/login", function (req: any, res: any) {
-    res.render('login', { title: 'Login' });
+    var error: boolean | string = false;
+    var flash : string[] = req.flash('error');
+    if (flash.length > 0) {
+        error = flash[0];
+    }
+    res.render('login', { title: 'Login', error: error });
 });
 
 router.post("/login", passport.authenticate('local', {
     successRedirect: '/',
-    failureRedirect: '/login'
+    failureRedirect: '/account/login',
+    failureFlash: true
 }));
 
 router.post("/signup", function (req: any, res: any) {
-    console.log(req.body);
     var email : string = req.body.email;
     var username : string = req.body.username;
     var password : string = req.body.password;
@@ -36,17 +43,29 @@ router.post("/signup", function (req: any, res: any) {
             if (err) {
                 console.error(err);
                 res.redirect('/');
+                connection.release();
                 return;
             }
 
             connection.query("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", [username, email, hash], function (err : any, results : any) {
+                connection.release();
                 if (err) {
                     console.error(err);
                     res.redirect('/');
                     return;
                 }
 
-                res.redirect('/');
+                utils.sendHtmlMailFromTemplate(email, "Traincarts Accounts", "Activate Account", "activate", {
+                    user: username,
+                    website: req.protocol + "://" + req.get('host'),
+                    code: "WIP"
+                }, function (err : any) {
+                    if (err) {
+                        console.log(err);
+                    }
+
+                    res.redirect('/');
+                });
             });
         })
     });
@@ -76,18 +95,53 @@ router.get('/discord/callback', function(req : any, res : any, next : any) {
     })(req, res, next);
 });
 
+router.get("/info", function (req : any, res : any) {
+    if (req.user !== undefined) {
+        global.pool.getConnection(function (err: any, connection: any) {
+            if (err) {
+                console.error(err);
+                res.json({
+                    error: true
+                });
+                return;
+            }
 
-/*router.get('/discord/callback', passport.authenticate('discord', function (err : any, user : any, info : any) {
-    console.log("auth");
-    if (err) {
-        console.error(err);
-        //res.redirect('/');
-    }
-    if (!user) {
-        //res.redirect("/account/discord");
-    }
+            connection.query("SELECT username FROM users WHERE id = ?", [req.user.id], function (err : any, results : any[]) {
+                connection.release();
+                if (err) {
+                    console.error(err);
+                    res.json({
+                        error: true
+                    });
+                    return
+                }
 
-    //console.log(req.session);
-}));*/
+                if (results.length !== 1) {
+                    res.json({
+                        error: true
+                    });
+                    return;
+                }
+
+                var user = results[0];
+                res.json({
+                    login: true,
+                    id: req.user.id,
+                    name: user.username
+                });
+            });
+        });
+    } else {
+        res.json({
+            login: false
+        })
+    }
+});
+
+router.get('/logout', function (req : any, res : any) {
+    req.logout();
+    res.redirect('/');
+});
+
 
 module.exports = router;

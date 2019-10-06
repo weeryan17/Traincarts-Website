@@ -29,5 +29,22 @@ $(document).ready(function () {
                 clearInterval(interval);
             }
         }, timeInterval);
-    }
+    };
+
+    $.ajax({
+        url: "/account/info",
+        success: function (data) {
+            var json = data;
+
+            if (json.error) {
+                return;
+            }
+
+            if (json.login) {
+                $("#header-login").css("display", "none");
+                $("#header-account").css("display", "block");
+                $("#account-dropdown").text(json.name);
+            }
+        }
+    })
 });

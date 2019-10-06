@@ -4,6 +4,7 @@ const express = require('express');
 // @ts-ignore
 const path = require('path');
 const logger = require('morgan');
+const flash = require('connect-flash');
 // @ts-ignore
 const passport = require('passport');
 var localStrategy = require("passport-local");
@@ -28,12 +29,14 @@ passport.use(new localStrategy(function (username: string, password: string, don
             return;
         }
 
-        connection.query("SELECT id, password FROM users WHERE username = ? OR email = ?", [username, username], function (error: any, results: any) {
+        connection.query("SELECT id, password, account_activated FROM users WHERE username = ? OR email = ?", [username, username], function (error: any, results: any) {
             if (results.length < 1) {
-                done(null, false, {message: "Incorrect username."});
+                done(null, false, {message: "Incorrect username"});
                 return;
             }
+
             var user = results[0];
+
             bcrypt.compare(password, user.password, function (err: any, res: any) {
                 if (err) {
                     console.error(err);
@@ -42,9 +45,14 @@ passport.use(new localStrategy(function (username: string, password: string, don
                 }
 
                 if (res) {
+                    if (!user.account_activated) {
+                        done(null, false, {message: "Account not activated"});
+                        return;
+                    }
+
                     done(null, { id: user.id });
                 } else {
-                    done(null, false, {message: 'Incorrect password.'});
+                    done(null, false, {message: 'Incorrect password'});
                 }
             });
 
@@ -83,6 +91,7 @@ app.use('/public', express.static(path.join(global.appRoot, 'public')));
 app.use(require('cookie-parser')());
 app.use(require('body-parser').urlencoded({extended: true}));
 app.use(require('express-session')({ secret: 'thing' }));
+app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 //app.use(formidableMiddleware());

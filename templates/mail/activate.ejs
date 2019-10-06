@@ -1,0 +1,15 @@
+<html lang="en">
+<head>
+    <style>
+        body {
+            background: rgb(50, 50, 50);
+            color: rgb(200, 200, 200);
+        }
+    </style>
+    <title>Email</title>
+</head>
+<body>
+<h2>Hello <%= user %></h2>
+<p>In order to start using you traincarts account you need to activate it via <a href="<%= website %>/account/activate?code=<%= encodeURI(code) %>">this link</a></p>
+</body>
+</html>

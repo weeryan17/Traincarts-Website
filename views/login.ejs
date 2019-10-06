@@ -14,6 +14,13 @@
         <span class="ts-text">Login</span>
     </h1>
     <br>
+    <% if (error !== false) { %>
+        <div class="d-flex justify-content-center">
+            <div class="alert alert-danger" role="alert" style="width: 50%">
+                <%= error %>
+            </div>
+        </div>
+    <% } %>
     <div class="d-flex justify-content-center">
         <div class="ts-secondary ts-border" style="width: 50%">
             <ul class="nav-tabs nav">
@@ -27,31 +34,38 @@
             <form id="login" action="/account/login" method="post">
                 <div class="form-group">
                     <label for="username">Username/Email</label>
-                    <input type="text" class="form-control ts-form-item" id="username" placeholder="Username/Email" name="username" required>
+                    <input type="text" class="form-control ts-form-item" id="username" placeholder="Username/Email"
+                           name="username" required>
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" class="form-control ts-form-item" id="password" placeholder="Password" name="password" required>
+                    <input type="password" class="form-control ts-form-item" id="password" placeholder="Password"
+                           name="password" required>
                 </div>
+                <p><a href="/account/forgot">Forgot Password?</a></p>
                 <button type="submit" class="btn btn-primary">Login</button>
             </form>
             <form id="signup" class="ts-hidden" action="/account/signup" method="post">
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" class="form-control ts-form-item" id="email" placeholder="Email" name="email" required>
+                    <input type="email" class="form-control ts-form-item" id="email" placeholder="Email" name="email"
+                           required>
                 </div>
                 <div class="form-group">
                     <label for="username-signup">Username</label>
-                    <input type="text" class="form-control ts-form-item" id="username-signup" placeholder="Username" name="username" required>
+                    <input type="text" class="form-control ts-form-item" id="username-signup" placeholder="Username"
+                           name="username" required>
                 </div>
                 <br/>
                 <div class="form-group">
                     <label for="password-signup">Password</label>
-                    <input type="password" class="form-control ts-form-item" id="password-signup" placeholder="Password" name="password" required>
+                    <input type="password" class="form-control ts-form-item" id="password-signup" placeholder="Password"
+                           name="password" required>
                 </div>
                 <div class="form-group">
                     <label for="password-repeat">Repeat Password</label>
-                    <input type="password" class="form-control ts-form-item" id="password-repeat" placeholder="Repeat Password" required>
+                    <input type="password" class="form-control ts-form-item" id="password-repeat"
+                           placeholder="Repeat Password" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Sign Up</button>
             </form>

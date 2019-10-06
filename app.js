@@ -2,6 +2,7 @@ var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var logger = require('morgan');
+var flash = require('connect-flash');
 var passport = require('passport');
 var localStrategy = require("passport-local");
 var bcrypt = require('bcrypt');
@@ -19,9 +20,9 @@ passport.use(new localStrategy(function (username, password, done) {
             done(err);
             return;
         }
-        connection.query("SELECT id, password FROM users WHERE username = ? OR email = ?", [username, username], function (error, results) {
+        connection.query("SELECT id, password, account_activated FROM users WHERE username = ? OR email = ?", [username, username], function (error, results) {
             if (results.length < 1) {
-                done(null, false, { message: "Incorrect username." });
+                done(null, false, { message: "Incorrect username" });
                 return;
             }
             var user = results[0];
@@ -32,10 +33,14 @@ passport.use(new localStrategy(function (username, password, done) {
                     return;
                 }
                 if (res) {
+                    if (!user.account_activated) {
+                        done(null, false, { message: "Account not activated" });
+                        return;
+                    }
                     done(null, { id: user.id });
                 }
                 else {
-                    done(null, false, { message: 'Incorrect password.' });
+                    done(null, false, { message: 'Incorrect password' });
                 }
             });
             connection.release();
@@ -62,6 +67,7 @@ app.use('/public', express.static(path.join(global.appRoot, 'public')));
 app.use(require('cookie-parser')());
 app.use(require('body-parser').urlencoded({ extended: true }));
 app.use(require('express-session')({ secret: 'thing' }));
+app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 readRoutesDir('.');
