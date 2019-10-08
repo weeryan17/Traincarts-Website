@@ -21,6 +21,14 @@ body {
     background-color: rgb(107, 115, 244);
 }
 
+.ts-form-item:valid {
+    border: 2px solid rgb(0, 154, 0) !important;
+}
+
+.ts-form-item:invalid {
+    border: 2px solid rgb(155, 64, 64) !important;
+}
+
 .ts-hidden {
   display: none;
 }

@@ -46,5 +46,20 @@ $(document).ready(function () {
                 $("#account-dropdown").text(json.name);
             }
         }
-    })
+    });
+
+    window.setTimeout(function () {
+        $("#alerts").hide(500);
+    }, 5000);
 });
+
+function checkInputMatches(input, id, message) {
+    var check = $(input);
+    var agents = $(id);
+
+    if (check.val() !== agents.val()) {
+        input.setCustomValidity(message);
+    } else {
+        input.setCustomValidity('');
+    }
+}

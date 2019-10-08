@@ -32,3 +32,16 @@
         </div>
     </ul>
 </nav>
+<div style="position: absolute; top: 60px; right: 0; width: 15%" id="alerts">
+    <%
+    if (messages != false) {
+        for (var i = 0; i < messages.length; i++) {
+    %>
+        <div class="alert alert-success" style="margin-top: 5px; padding: 5px">
+            <%= messages[i] %>
+        </div>
+    <%
+        }
+    }
+    %>
+</div>

@@ -35,7 +35,7 @@
                 <div class="form-group">
                     <label for="username">Username/Email</label>
                     <input type="text" class="form-control ts-form-item" id="username" placeholder="Username/Email"
-                           name="username" required>
+                           name="username" required maxlength="50">
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
@@ -49,12 +49,12 @@
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="email" class="form-control ts-form-item" id="email" placeholder="Email" name="email"
-                           required>
+                           required maxlength="50">
                 </div>
                 <div class="form-group">
                     <label for="username-signup">Username</label>
                     <input type="text" class="form-control ts-form-item" id="username-signup" placeholder="Username"
-                           name="username" required>
+                           name="username" required maxlength="50">
                 </div>
                 <br/>
                 <div class="form-group">
@@ -65,7 +65,7 @@
                 <div class="form-group">
                     <label for="password-repeat">Repeat Password</label>
                     <input type="password" class="form-control ts-form-item" id="password-repeat"
-                           placeholder="Repeat Password" required>
+                           placeholder="Repeat Password" required oninput="checkInputMatches(this, '#password-signup', 'Passwords must match.')">
                 </div>
                 <button type="submit" class="btn btn-primary">Sign Up</button>
             </form>

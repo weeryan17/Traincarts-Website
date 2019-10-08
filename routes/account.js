@@ -1,5 +1,6 @@
 var passport = global.passport;
 var bcrypt = require('bcrypt');
+var randomString = require('randomstring');
 var utils = require('../utils.js');
 var express = require('express');
 var router = express.Router();
@@ -12,13 +13,52 @@ router.get("/login", function (req, res) {
     if (flash.length > 0) {
         error = flash[0];
     }
-    res.render('login', { title: 'Login', error: error });
+    var messages = false;
+    var flashMessages = req.flash('messages');
+    var flashSuccess = req.flash('success');
+    if (flashMessages.length > 0) {
+        messages = flashMessages;
+    }
+    if (flashSuccess.length > 0) {
+        if (messages !== false) {
+            messages.concat(flashSuccess);
+        }
+        else {
+            messages = flashSuccess;
+        }
+    }
+    res.render('login', { title: 'Login', error: error, messages: messages });
 });
 router.post("/login", passport.authenticate('local', {
     successRedirect: '/',
     failureRedirect: '/account/login',
-    failureFlash: true
+    failureFlash: true,
+    successFlash: 'Logged in'
 }));
+router.get('/activate', function (req, res) {
+    var key = req.query.code;
+    if (key === undefined) {
+        res.redirect('/');
+        return;
+    }
+    global.pool.getConnection(function (err, connection) {
+        if (err) {
+            console.error(err);
+            res.redirect('/');
+            return;
+        }
+        connection.query("UPDATE users SET account_activated = 1, activation_key = null WHERE activation_key = ?", [key], function (err, results) {
+            connection.release();
+            if (err) {
+                console.error(err);
+                res.redirect('/');
+                return;
+            }
+            req.flash('messages', 'Account activated');
+            res.redirect('/account/login');
+        });
+    });
+});
 router.post("/signup", function (req, res) {
     var email = req.body.email;
     var username = req.body.username;
@@ -36,7 +76,8 @@ router.post("/signup", function (req, res) {
                 connection.release();
                 return;
             }
-            connection.query("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", [username, email, hash], function (err, results) {
+            var activationKey = randomString.generate(20);
+            connection.query("INSERT INTO users (username, email, activation_key, password) VALUES (?, ?, ?, ?)", [username, email, activationKey, hash], function (err, results) {
                 connection.release();
                 if (err) {
                     console.error(err);
@@ -46,11 +87,12 @@ router.post("/signup", function (req, res) {
                 utils.sendHtmlMailFromTemplate(email, "Traincarts Accounts", "Activate Account", "activate", {
                     user: username,
                     website: req.protocol + "://" + req.get('host'),
-                    code: "WIP"
+                    code: activationKey
                 }, function (err) {
                     if (err) {
                         console.log(err);
                     }
+                    req.flash('messages', 'Check your email in order to activate your account');
                     res.redirect('/');
                 });
             });
@@ -119,6 +161,7 @@ router.get("/info", function (req, res) {
 });
 router.get('/logout', function (req, res) {
     req.logout();
+    req.flash('messages', 'Logged out');
     res.redirect('/');
 });
 module.exports = router;
