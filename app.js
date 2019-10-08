@@ -66,7 +66,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use('/public', express.static(path.join(global.appRoot, 'public')));
 app.use(require('cookie-parser')());
 app.use(require('body-parser').urlencoded({ extended: true }));
-app.use(require('express-session')({ secret: 'thing' }));
+var session = require('express-session');
+var fileStore = require('session-file-store')(session);
+app.use(session({
+    store: new fileStore({}),
+    secret: config.session.secret
+}));
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
