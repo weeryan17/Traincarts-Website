@@ -1,8 +1,24 @@
 {
   "database": {
     "host": "127.0.0.1",
-    "port": 3306,
     "user": "user",
-    "password": "password"
+    "password": "password",
+    "database": "traincarts_main"
+  },
+  "discord": {
+    "clientID": "id",
+    "clientSecret": "secret",
+    "callbackURL": "callback url of site"
+  },
+  "mail": {
+    "host": "smpt server",
+    "port": 587,
+    "auth": {
+      "user": "username/email",
+      "pass": "password"
+    }
+  },
+  "session": {
+    "secret": "secret"
   }
 }
