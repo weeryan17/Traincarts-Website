@@ -66,34 +66,60 @@ router.post("/signup", function (req, res) {
     global.pool.getConnection(function (err, connection) {
         if (err) {
             console.error(err);
-            res.redirect('/');
+            req.flash('error', 'Failed to connect to database');
+            res.redirect('/account/login#signup');
             return;
         }
         bcrypt.hash(password, 10, function (err, hash) {
             if (err) {
+                req.flash('error', 'Error encrypting password');
+                res.redirect('/account/login#signup');
                 console.error(err);
                 res.redirect('/');
                 connection.release();
                 return;
             }
             var activationKey = randomString.generate(20);
-            connection.query("INSERT INTO users (username, email, activation_key, password) VALUES (?, ?, ?, ?)", [username, email, activationKey, hash], function (err, results) {
-                connection.release();
+            connection.query("SELECT sum(if(username = ?, 1, 0)) as 'usernames', sum(if(email = ?, 1, 0)) as 'emails' FROM users", [username, email], function (err, results) {
                 if (err) {
                     console.error(err);
-                    res.redirect('/');
+                    connection.release();
+                    req.flash('error', 'Error running query - select');
+                    res.redirect('/account/login#signup');
                     return;
                 }
-                utils.sendHtmlMailFromTemplate(email, "Traincarts Accounts", "Activate Account", "activate", {
-                    user: username,
-                    website: req.protocol + "://" + req.get('host'),
-                    code: activationKey
-                }, function (err) {
+                var result = results[0];
+                if (result.usernames > 0) {
+                    req.flash('error', 'Username taken!');
+                    res.redirect('/account/login#signup');
+                    connection.release();
+                    return;
+                }
+                if (result.emails > 0) {
+                    req.flash('error', "Email in use!");
+                    res.redirect('/account/login#signup');
+                    connection.release();
+                    return;
+                }
+                connection.query("INSERT INTO users (username, email, activation_key, password) VALUES (?, ?, ?, ?)", [username, email, activationKey, hash], function (err, results) {
+                    connection.release();
                     if (err) {
-                        console.log(err);
+                        req.flash('error', "Error running query - insert");
+                        res.redirect('/account/login#signup');
+                        return;
                     }
-                    req.flash('messages', 'Check your email in order to activate your account');
-                    res.redirect('/');
+                    utils.sendHtmlMailFromTemplate(email, "Traincarts Accounts", "Activate Account", "activate", {
+                        user: username,
+                        website: req.protocol + "://" + req.get('host'),
+                        code: activationKey
+                    }, function (err) {
+                        if (err) {
+                            console.log(err);
+                            return;
+                        }
+                        req.flash('messages', 'Check your email in order to activate your account');
+                        res.redirect('/');
+                    });
                 });
             });
         });
