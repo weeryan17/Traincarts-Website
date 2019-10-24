@@ -20,6 +20,8 @@
     "oauth2-server": "^3.0.1",
     "passport": "^0.4.0",
     "passport-discord": "^0.1.3",
-    "passport-local": "^1.0.0"
+    "passport-local": "^1.0.0",
+    "randomstring": "^1.1.5",
+    "session-file-store": "^1.3.1"
   }
 }
