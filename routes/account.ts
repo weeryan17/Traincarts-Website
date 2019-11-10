@@ -4,7 +4,7 @@ var bcrypt = require('bcrypt');
 
 var randomString = require('randomstring');
 
-var utils = require('../utils.js');
+var utils = require('../utils/utils.js');
 
 // @ts-ignore
 var express = require('express');
@@ -220,6 +220,12 @@ router.get('/logout', function (req : any, res : any) {
     req.flash('messages', 'Logged out');
     res.redirect('/');
 });
+
+//region oauth
+router.get('/app/:id', function (req : any, res : any) {
+    
+});
+//endregion
 
 
 module.exports = router;

@@ -1,7 +1,7 @@
 var passport = global.passport;
 var bcrypt = require('bcrypt');
 var randomString = require('randomstring');
-var utils = require('../utils.js');
+var utils = require('../utils/utils.js');
 var express = require('express');
 var router = express.Router();
 router.get("/", function (req, res) {
@@ -189,6 +189,8 @@ router.get('/logout', function (req, res) {
     req.logout();
     req.flash('messages', 'Logged out');
     res.redirect('/');
+});
+router.get('/app/:id', function (req, res) {
 });
 module.exports = router;
 //# sourceMappingURL=account.js.map
