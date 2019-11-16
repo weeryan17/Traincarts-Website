@@ -81,6 +81,49 @@ const model = {
         });
     },
 
+    getAuthorizationCode: function (code: string, callback: any) {
+        global.pool.getConnection(function (err: any, connection: any) {
+            if (err) {
+                console.error(err);
+                callback(null);
+                return;
+            }
+
+            connection.query("SELECT * FROM oauth_codes WHERE code = ?",
+                [code],
+                function (err: any, results: any) {
+                    connection.release();
+                    if (err) {
+                        console.error(err);
+                        callback(null);
+                        return;
+                    }
+
+                    if (results.length < 1) {
+                        callback(null);
+                        return;
+                    }
+
+                    let result = results[0];
+
+                    let return_code = {
+                        "authorizationCode": result.code,
+                        "expiresAt": result.expire,
+                        "redirectUri": result.uri,
+                        "client": {
+                            "id": result.client_id
+                        },
+                        "user": {
+                            "id": result.user_id
+                        }
+                    };
+
+                    callback(return_code);
+                }
+            );
+        });
+    },
+
     getClient: function (clientId: string, clientSecret: string, callback: (client: any) => void) {
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
@@ -123,7 +166,8 @@ const model = {
                                 "id": clientId,
                                 "redirectUris": uris,
                                 "grants": [
-                                    "refresh_token"
+                                    "refresh_token",
+                                    "authorization_code"
                                 ]
                             };
 
@@ -163,7 +207,41 @@ const model = {
                     };
 
                     callback(returnToken);
-                })
+                });
+        });
+    },
+
+    saveAuthorizationCode: function (code: { authorizationCode: string; expiresAt: string; redirectUri: string }, client: { id: string; }, user: { id: number; }, callback: any) {
+        global.pool.getConnection(function (err: any, connection: any) {
+            if (err) {
+                console.error(err);
+                callback(null);
+                return;
+            }
+
+            connection.query("INSERT INTO oauth_codes (code, expire, uri, user_id, client_id) VALUES (?, ?, ?, ?, ?)",
+                [code.authorizationCode, code.expiresAt, code.redirectUri, user.id, client.id],
+                function (err: any) {
+                    connection.release();
+                    if (err) {
+                        console.error(err);
+                        callback(null);
+                        return;
+                    }
+
+                    let return_code = {
+                        "authorizationCode": code.authorizationCode,
+                        "expiresAt": code.expiresAt,
+                        "redirectUri": code.redirectUri,
+                        "client": {
+                            "id": client.id
+                        },
+                        "user": user
+                    };
+
+                    callback(return_code);
+                }
+            );
         });
     },
 
@@ -177,6 +255,29 @@ const model = {
 
             connection.query("DELETE FROM oauth_tokens WHERE client_id = ? AND user_id = ? AND refresh_token = ?",
                 [token.client.id, token.user.id, token.refreshToken],
+                function (err: any, results: any) {
+                    connection.release();
+                    if (err) {
+                        console.error(err);
+                        callback(false);
+                        return;
+                    }
+
+                    callback(results.affectedRows > 0);
+                });
+        });
+    },
+
+    revokeAuthorizationCode: function (code: { authorizationCode: string; }, callback: any) {
+        global.pool.getConnection(function (err: any, connection: any) {
+            if (err) {
+                console.error(err);
+                callback(false);
+                return;
+            }
+
+            connection.query("DELETE FROM oauth_codes WHERE code = ?",
+                [code.authorizationCode],
                 function (err: any, results: any) {
                     connection.release();
                     if (err) {

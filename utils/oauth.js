@@ -65,6 +65,40 @@ var model = {
             });
         });
     },
+    getAuthorizationCode: function (code, callback) {
+        global.pool.getConnection(function (err, connection) {
+            if (err) {
+                console.error(err);
+                callback(null);
+                return;
+            }
+            connection.query("SELECT * FROM oauth_codes WHERE code = ?", [code], function (err, results) {
+                connection.release();
+                if (err) {
+                    console.error(err);
+                    callback(null);
+                    return;
+                }
+                if (results.length < 1) {
+                    callback(null);
+                    return;
+                }
+                var result = results[0];
+                var return_code = {
+                    "authorizationCode": result.code,
+                    "expiresAt": result.expire,
+                    "redirectUri": result.uri,
+                    "client": {
+                        "id": result.client_id
+                    },
+                    "user": {
+                        "id": result.user_id
+                    }
+                };
+                callback(return_code);
+            });
+        });
+    },
     getClient: function (clientId, clientSecret, callback) {
         global.pool.getConnection(function (err, connection) {
             if (err) {
@@ -98,7 +132,8 @@ var model = {
                         "id": clientId,
                         "redirectUris": uris,
                         "grants": [
-                            "refresh_token"
+                            "refresh_token",
+                            "authorization_code"
                         ]
                     };
                     callback(client);
@@ -134,6 +169,33 @@ var model = {
             });
         });
     },
+    saveAuthorizationCode: function (code, client, user, callback) {
+        global.pool.getConnection(function (err, connection) {
+            if (err) {
+                console.error(err);
+                callback(null);
+                return;
+            }
+            connection.query("INSERT INTO oauth_codes (code, expire, uri, user_id, client_id) VALUES (?, ?, ?, ?, ?)", [code.authorizationCode, code.expiresAt, code.redirectUri, user.id, client.id], function (err) {
+                connection.release();
+                if (err) {
+                    console.error(err);
+                    callback(null);
+                    return;
+                }
+                var return_code = {
+                    "authorizationCode": code.authorizationCode,
+                    "expiresAt": code.expiresAt,
+                    "redirectUri": code.redirectUri,
+                    "client": {
+                        "id": client.id
+                    },
+                    "user": user
+                };
+                callback(return_code);
+            });
+        });
+    },
     revokeToken: function (token, callback) {
         global.pool.getConnection(function (err, connection) {
             if (err) {
@@ -142,6 +204,24 @@ var model = {
                 return;
             }
             connection.query("DELETE FROM oauth_tokens WHERE client_id = ? AND user_id = ? AND refresh_token = ?", [token.client.id, token.user.id, token.refreshToken], function (err, results) {
+                connection.release();
+                if (err) {
+                    console.error(err);
+                    callback(false);
+                    return;
+                }
+                callback(results.affectedRows > 0);
+            });
+        });
+    },
+    revokeAuthorizationCode: function (code, callback) {
+        global.pool.getConnection(function (err, connection) {
+            if (err) {
+                console.error(err);
+                callback(false);
+                return;
+            }
+            connection.query("DELETE FROM oauth_codes WHERE code = ?", [code.authorizationCode], function (err, results) {
                 connection.release();
                 if (err) {
                     console.error(err);
