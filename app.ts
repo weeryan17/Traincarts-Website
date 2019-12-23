@@ -29,7 +29,7 @@ passport.use(new localStrategy(function (username: string, password: string, don
             return;
         }
 
-        connection.query("SELECT id, password, account_activated FROM users WHERE username = ? OR email = ?", [username, username], function (error: any, results: any) {
+        connection.query("SELECT id, password, account_activated FROM traincarts_users WHERE username = ? OR email = ?", [username, username], function (error: any, results: any) {
             if (results.length < 1) {
                 done(null, false, {message: "Incorrect username"});
                 return;
@@ -104,6 +104,24 @@ app.use(passport.initialize());
 app.use(passport.session());
 //app.use(formidableMiddleware());
 
+app.use(function (req: any, res: any , next: any) {
+    var messages: boolean | string[] = false;
+    var flashMessages : string[] = req.flash('messages');
+    var flashSuccess : string[] = req.flash('success');
+    if (flashMessages.length > 0) {
+        messages = flashMessages;
+    }
+    if (flashSuccess.length > 0) {
+        if (messages !== false) {
+            messages.concat(flashSuccess);
+        } else {
+            messages = flashSuccess;
+        }
+    }
+    req.messages = messages;
+    next()
+});
+
 readRoutesDir('.');
 
 function readRoutesDir(parent: string) {
@@ -156,7 +174,7 @@ app.use(function (req: any, res: any) {
 
     // render the error page
     res.status(404);
-    res.render('error', {title: 'Error'});
+    res.render('error', {title: 'Error', messages: req.messages});
 });
 
 module.exports = app;

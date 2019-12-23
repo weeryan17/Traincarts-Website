@@ -1,5 +1,9 @@
 var model = {
+    generateAuthorizationCode: function (client, user, scope, callback) {
+        callback(Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
+    },
     getAccessToken: function (token, callback) {
+        console.log("getAccessToken");
         global.pool.getConnection(function (err, connection) {
             if (err) {
                 console.error(err);
@@ -33,6 +37,7 @@ var model = {
         });
     },
     getRefreshToken: function (refresh, callback) {
+        console.log("getRefreshToken");
         global.pool.getConnection(function (err, connection) {
             if (err) {
                 console.error(err);
@@ -66,6 +71,7 @@ var model = {
         });
     },
     getAuthorizationCode: function (code, callback) {
+        console.log("getAuthorizationCode");
         global.pool.getConnection(function (err, connection) {
             if (err) {
                 console.error(err);
@@ -100,6 +106,23 @@ var model = {
         });
     },
     getClient: function (clientId, clientSecret, callback) {
+        console.log("getClient");
+        var builtInClients = global.config.site_oauth_secrets;
+        for (var i = 0; i < builtInClients.length; i++) {
+            var builtInClient = builtInClients[i];
+            if (builtInClient.id === clientId && builtInClient.secret === clientSecret) {
+                var uris = [builtInClient.uri];
+                callback({
+                    "id": clientId,
+                    "redirectUris": uris,
+                    "grants": [
+                        "refresh_token",
+                        "authorization_code"
+                    ]
+                });
+                return;
+            }
+        }
         global.pool.getConnection(function (err, connection) {
             if (err) {
                 console.error(err);
@@ -125,8 +148,8 @@ var model = {
                         return;
                     }
                     var uris = [];
-                    for (var i = 0; i < results.length; i++) {
-                        uris.push(results[i].uri);
+                    for (var i_1 = 0; i_1 < results.length; i_1++) {
+                        uris.push(results[i_1].uri);
                     }
                     var client = {
                         "id": clientId,
@@ -142,6 +165,7 @@ var model = {
         });
     },
     saveToken: function (token, client, user, callback) {
+        console.log("saveToken");
         global.pool.getConnection(function (err, connection) {
             if (err) {
                 console.error(err);
@@ -170,6 +194,7 @@ var model = {
         });
     },
     saveAuthorizationCode: function (code, client, user, callback) {
+        console.log("saveAuthorizationCode");
         global.pool.getConnection(function (err, connection) {
             if (err) {
                 console.error(err);
@@ -197,6 +222,7 @@ var model = {
         });
     },
     revokeToken: function (token, callback) {
+        console.log("revokeToken");
         global.pool.getConnection(function (err, connection) {
             if (err) {
                 console.error(err);
@@ -215,6 +241,7 @@ var model = {
         });
     },
     revokeAuthorizationCode: function (code, callback) {
+        console.log("revokeAuthorizationCode");
         global.pool.getConnection(function (err, connection) {
             if (err) {
                 console.error(err);

@@ -22,6 +22,10 @@
     "secret": "secret"
   },
   "site_oauth_secrets": [
-    "secrets to use for linking other traincarts sites"
+    {
+      "id": "",
+      "callback": "",
+      "secret": ""
+    }
   ]
 }

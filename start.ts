@@ -37,6 +37,38 @@ global["pool"] = mysql.createPool(mysql_config);
 // @ts-ignore
 global["config"] = config;
 
+var oauth_default_clients: {id: string, callback: string, secret: string}[] = config.site_oauth_secrets;
+
+global.pool.getConnection(function (err: any, connection: any) {
+    if (err) {
+        console.error(err);
+        return;
+    }
+
+    for (var i = 0; i < oauth_default_clients.length; i++) {
+        var defaultClient: {id: string, callback: string, secret: string} = oauth_default_clients[i];
+        const number = i;
+        connection.query("SELECT COUNT(client_id) as 'clients' FROM oauth_clients WHERE client_id = ?",
+            [defaultClient.id],
+            function (err: any, results: any) {
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                var defaultClient: {id: string, callback: string, secret: string} = oauth_default_clients[number];
+                if (results[0].clients == 0) {
+                    connection.query("INSERT INTO oauth_clients (client_id, client_name, client_secret) VALUES (?, ?, ?)",
+                        [defaultClient.id, 'Traincarts', defaultClient.secret], function (err: any) {
+                            if (err) {
+                                console.log(err);
+                                return;
+                            }
+                        });
+                }
+            });
+    }
+});
+
 /**
  * Module dependencies.
  */

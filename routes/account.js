@@ -13,21 +13,7 @@ router.get("/login", function (req, res) {
     if (flash.length > 0) {
         error = flash[0];
     }
-    var messages = false;
-    var flashMessages = req.flash('messages');
-    var flashSuccess = req.flash('success');
-    if (flashMessages.length > 0) {
-        messages = flashMessages;
-    }
-    if (flashSuccess.length > 0) {
-        if (messages !== false) {
-            messages.concat(flashSuccess);
-        }
-        else {
-            messages = flashSuccess;
-        }
-    }
-    res.render('login', { title: 'Login', error: error, messages: messages });
+    res.render('login', { title: 'Login', error: error, messages: req.messages });
 });
 router.post("/login", passport.authenticate('local', {
     successRedirect: '/',
@@ -47,7 +33,7 @@ router.get('/activate', function (req, res) {
             res.redirect('/');
             return;
         }
-        connection.query("UPDATE users SET account_activated = 1, activation_key = null WHERE activation_key = ?", [key], function (err, results) {
+        connection.query("UPDATE traincarts_users SET account_activated = 1, activation_key = null WHERE activation_key = ?", [key], function (err, results) {
             connection.release();
             if (err) {
                 console.error(err);
@@ -80,7 +66,7 @@ router.post("/signup", function (req, res) {
                 return;
             }
             var activationKey = randomString.generate(20);
-            connection.query("SELECT sum(if(username = ?, 1, 0)) as 'usernames', sum(if(email = ?, 1, 0)) as 'emails' FROM users", [username, email], function (err, results) {
+            connection.query("SELECT sum(if(username = ?, 1, 0)) as 'usernames', sum(if(email = ?, 1, 0)) as 'emails' FROM traincarts_users", [username, email], function (err, results) {
                 if (err) {
                     console.error(err);
                     connection.release();
@@ -101,7 +87,7 @@ router.post("/signup", function (req, res) {
                     connection.release();
                     return;
                 }
-                connection.query("INSERT INTO users (username, email, activation_key, password) VALUES (?, ?, ?, ?)", [username, email, activationKey, hash], function (err, results) {
+                connection.query("INSERT INTO traincarts_users (username, email, activation_key, password) VALUES (?, ?, ?, ?)", [username, email, activationKey, hash], function (err, results) {
                     connection.release();
                     if (err) {
                         req.flash('error', "Error running query - insert");
@@ -155,7 +141,7 @@ router.get("/info", function (req, res) {
                 });
                 return;
             }
-            connection.query("SELECT username FROM users WHERE id = ?", [req.user.id], function (err, results) {
+            connection.query("SELECT username FROM traincarts_users WHERE id = ?", [req.user.id], function (err, results) {
                 connection.release();
                 if (err) {
                     console.error(err);

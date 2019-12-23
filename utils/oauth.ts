@@ -1,5 +1,9 @@
 const model = {
+    generateAuthorizationCode: function(client: {id: string}, user: {id: number}, scope : string, callback: (code: string) => void ) {
+        callback(Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
+    },
     getAccessToken: function (token: string, callback: (token: any) => void) {
+        console.log("getAccessToken");
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
@@ -41,6 +45,7 @@ const model = {
     },
 
     getRefreshToken: function (refresh: string, callback: (refresh: any) => void) {
+        console.log("getRefreshToken");
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
@@ -82,6 +87,7 @@ const model = {
     },
 
     getAuthorizationCode: function (code: string, callback: any) {
+        console.log("getAuthorizationCode");
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
@@ -125,6 +131,24 @@ const model = {
     },
 
     getClient: function (clientId: string, clientSecret: string, callback: (client: any) => void) {
+        console.log("getClient");
+        // @ts-ignore
+        var builtInClients: {id: string, uri: string, secret: string}[] = global.config.site_oauth_secrets;
+        for (var i = 0; i < builtInClients.length; i++) {
+            var builtInClient: {id: string, uri: string, secret: string} = builtInClients[i];
+            if (builtInClient.id === clientId && builtInClient.secret === clientSecret) {
+                var uris = [builtInClient.uri];
+                callback({
+                    "id": clientId,
+                    "redirectUris": uris,
+                    "grants": [
+                        "refresh_token",
+                        "authorization_code"
+                    ]
+                });
+                return;
+            }
+        }
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
@@ -178,6 +202,7 @@ const model = {
     },
 
     saveToken: function (token: { accessToken: string; accessTokenExpiresAt: any; refreshToken: string; refreshTokenExpiresAt: any; }, client: { id: string; }, user: { id: number; }, callback: (token: any) => void) {
+        console.log("saveToken");
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
@@ -212,6 +237,7 @@ const model = {
     },
 
     saveAuthorizationCode: function (code: { authorizationCode: string; expiresAt: string; redirectUri: string }, client: { id: string; }, user: { id: number; }, callback: any) {
+        console.log("saveAuthorizationCode");
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
@@ -246,6 +272,7 @@ const model = {
     },
 
     revokeToken: function (token: { client: { id: string; }; user: { id: number; }; refreshToken: string; }, callback: (success: boolean) => void) {
+        console.log("revokeToken");
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
@@ -269,6 +296,7 @@ const model = {
     },
 
     revokeAuthorizationCode: function (code: { authorizationCode: string; }, callback: any) {
+        console.log("revokeAuthorizationCode");
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
