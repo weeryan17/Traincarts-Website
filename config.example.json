@@ -20,5 +20,12 @@
   },
   "session": {
     "secret": "secret"
-  }
+  },
+  "site_oauth_secrets": [
+    {
+      "id": "",
+      "callback": "",
+      "secret": ""
+    }
+  ]
 }

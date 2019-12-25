@@ -20,7 +20,7 @@ passport.use(new localStrategy(function (username, password, done) {
             done(err);
             return;
         }
-        connection.query("SELECT id, password, account_activated FROM users WHERE username = ? OR email = ?", [username, username], function (error, results) {
+        connection.query("SELECT id, password, account_activated FROM traincarts_users WHERE username = ? OR email = ?", [username, username], function (error, results) {
             if (results.length < 1) {
                 done(null, false, { message: "Incorrect username" });
                 return;
@@ -75,6 +75,24 @@ app.use(session({
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(function (req, res, next) {
+    var messages = false;
+    var flashMessages = req.flash('messages');
+    var flashSuccess = req.flash('success');
+    if (flashMessages.length > 0) {
+        messages = flashMessages;
+    }
+    if (flashSuccess.length > 0) {
+        if (messages !== false) {
+            messages.concat(flashSuccess);
+        }
+        else {
+            messages = flashSuccess;
+        }
+    }
+    req.messages = messages;
+    next();
+});
 readRoutesDir('.');
 function readRoutesDir(parent) {
     var dir = path.join(global.appRoot, 'routes', parent);
@@ -116,7 +134,7 @@ app.use(function (req, res) {
     res.locals.message = "Page not found";
     res.locals.status = 404;
     res.status(404);
-    res.render('error', { title: 'Error' });
+    res.render('error', { title: 'Error', messages: req.messages });
 });
 module.exports = app;
 //# sourceMappingURL=app.js.map

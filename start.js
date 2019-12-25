@@ -14,6 +14,36 @@ mysql_config.typeCast = function castField(field, useDefaultTypeCasting) {
 };
 global["pool"] = mysql.createPool(mysql_config);
 global["config"] = config;
+var oauth_default_clients = config.site_oauth_secrets;
+global.pool.getConnection(function (err, connection) {
+    if (err) {
+        console.error(err);
+        return;
+    }
+    var _loop_1 = function () {
+        defaultClient = oauth_default_clients[i];
+        var number = i;
+        connection.query("SELECT COUNT(client_id) as 'clients' FROM oauth_clients WHERE client_id = ?", [defaultClient.id], function (err, results) {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            var defaultClient = oauth_default_clients[number];
+            if (results[0].clients == 0) {
+                connection.query("INSERT INTO oauth_clients (client_id, client_name, client_secret) VALUES (?, ?, ?)", [defaultClient.id, 'Traincarts', defaultClient.secret], function (err) {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                });
+            }
+        });
+    };
+    var defaultClient;
+    for (var i = 0; i < oauth_default_clients.length; i++) {
+        _loop_1();
+    }
+});
 var app = require('./app.js');
 var debug = require('debug')('site:server');
 var http = require('http');
