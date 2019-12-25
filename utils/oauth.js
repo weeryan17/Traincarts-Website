@@ -1,24 +1,24 @@
 var model = {
     generateAuthorizationCode: function (client, user, scope, callback) {
-        callback(Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
+        callback(null, Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
     },
     getAccessToken: function (token, callback) {
         console.log("getAccessToken");
         global.pool.getConnection(function (err, connection) {
             if (err) {
                 console.error(err);
-                callback(null);
+                callback(err, null);
                 return;
             }
             connection.query("SELECT client_id, user_id, access_expire FROM oauth_tokens WHERE access_token = ?", [token], function (err, results) {
                 connection.release();
                 if (err) {
                     console.error(err);
-                    callback(null);
+                    callback(err, null);
                     return;
                 }
                 if (results.length !== 1) {
-                    callback(null);
+                    callback(null, {});
                     return;
                 }
                 var result = results[0];
@@ -32,7 +32,7 @@ var model = {
                         "id": result.user_id
                     }
                 };
-                callback(return_token);
+                callback(null, return_token);
             });
         });
     },
@@ -41,18 +41,18 @@ var model = {
         global.pool.getConnection(function (err, connection) {
             if (err) {
                 console.error(err);
-                callback(null);
+                callback(err, null);
                 return;
             }
             connection.query("SELECT client_id, user_id, refresh_expire FROM oauth_tokens WHERE refresh_token = ?", [refresh], function (err, results) {
                 connection.release();
                 if (err) {
                     console.error(err);
-                    callback(null);
+                    callback(err, null);
                     return;
                 }
                 if (results.length !== 1) {
-                    callback(null);
+                    callback(null, {});
                     return;
                 }
                 var result = results[0];
@@ -66,7 +66,7 @@ var model = {
                         "id": result.user_id
                     }
                 };
-                callback(return_token);
+                callback(null, return_token);
             });
         });
     },
@@ -75,18 +75,18 @@ var model = {
         global.pool.getConnection(function (err, connection) {
             if (err) {
                 console.error(err);
-                callback(null);
+                callback(err, null);
                 return;
             }
             connection.query("SELECT * FROM oauth_codes WHERE code = ?", [code], function (err, results) {
                 connection.release();
                 if (err) {
                     console.error(err);
-                    callback(null);
+                    callback(err, null);
                     return;
                 }
                 if (results.length < 1) {
-                    callback(null);
+                    callback(null, {});
                     return;
                 }
                 var result = results[0];
@@ -101,7 +101,7 @@ var model = {
                         "id": result.user_id
                     }
                 };
-                callback(return_code);
+                callback(null, return_code);
             });
         });
     },
@@ -111,40 +111,41 @@ var model = {
         for (var i = 0; i < builtInClients.length; i++) {
             var builtInClient = builtInClients[i];
             if (builtInClient.id === clientId && builtInClient.secret === clientSecret) {
-                var uris = [builtInClient.uri];
-                callback({
+                var uris = [builtInClient.callback];
+                var client = {
                     "id": clientId,
                     "redirectUris": uris,
                     "grants": [
                         "refresh_token",
                         "authorization_code"
                     ]
-                });
+                };
+                callback(null, client);
                 return;
             }
         }
         global.pool.getConnection(function (err, connection) {
             if (err) {
                 console.error(err);
-                callback(null);
+                callback(err, null);
                 return;
             }
             connection.query("SELECT * FROM oauth_clients WHERE client_id = ? AND client_secret = ?", [clientId, clientSecret], function (err, results) {
                 if (err) {
                     connection.release();
                     console.error(err);
-                    callback(null);
+                    callback(err, null);
                     return;
                 }
                 if (results.length == 0) {
-                    callback(null);
+                    callback(null, {});
                     return;
                 }
                 connection.query("SELECT uri FROM oauth_uris WHERE client_id = ?", [clientId], function (err, results) {
                     connection.release();
                     if (err) {
                         console.error(err);
-                        callback(null);
+                        callback(err, null);
                         return;
                     }
                     var uris = [];
@@ -159,7 +160,7 @@ var model = {
                             "authorization_code"
                         ]
                     };
-                    callback(client);
+                    callback(null, client);
                 });
             });
         });
@@ -169,14 +170,14 @@ var model = {
         global.pool.getConnection(function (err, connection) {
             if (err) {
                 console.error(err);
-                callback(null);
+                callback(err, null);
                 return;
             }
             connection.query("INSERT INTO oauth_tokens (client_id, user_id, access_token, access_expire, refresh_token, refresh_expire) VALUES (?, ?, ?, ?, ?, ?)", [client.id, user.id, token.accessToken, token.accessTokenExpiresAt, token.refreshToken, token.refreshTokenExpiresAt], function (err) {
                 connection.release();
                 if (err) {
                     console.error(err);
-                    callback(null);
+                    callback(err, null);
                     return;
                 }
                 var returnToken = {
@@ -189,7 +190,7 @@ var model = {
                     },
                     "user": user
                 };
-                callback(returnToken);
+                callback(null, returnToken);
             });
         });
     },
@@ -198,14 +199,14 @@ var model = {
         global.pool.getConnection(function (err, connection) {
             if (err) {
                 console.error(err);
-                callback(null);
+                callback(err, null);
                 return;
             }
             connection.query("INSERT INTO oauth_codes (code, expire, uri, user_id, client_id) VALUES (?, ?, ?, ?, ?)", [code.authorizationCode, code.expiresAt, code.redirectUri, user.id, client.id], function (err) {
                 connection.release();
                 if (err) {
                     console.error(err);
-                    callback(null);
+                    callback(err, null);
                     return;
                 }
                 var return_code = {
@@ -217,7 +218,7 @@ var model = {
                     },
                     "user": user
                 };
-                callback(return_code);
+                callback(null, return_code);
             });
         });
     },
@@ -226,17 +227,17 @@ var model = {
         global.pool.getConnection(function (err, connection) {
             if (err) {
                 console.error(err);
-                callback(false);
+                callback(err, false);
                 return;
             }
             connection.query("DELETE FROM oauth_tokens WHERE client_id = ? AND user_id = ? AND refresh_token = ?", [token.client.id, token.user.id, token.refreshToken], function (err, results) {
                 connection.release();
                 if (err) {
                     console.error(err);
-                    callback(false);
+                    callback(err, false);
                     return;
                 }
-                callback(results.affectedRows > 0);
+                callback(null, results.affectedRows > 0);
             });
         });
     },
@@ -245,17 +246,17 @@ var model = {
         global.pool.getConnection(function (err, connection) {
             if (err) {
                 console.error(err);
-                callback(false);
+                callback(err, false);
                 return;
             }
             connection.query("DELETE FROM oauth_codes WHERE code = ?", [code.authorizationCode], function (err, results) {
                 connection.release();
                 if (err) {
                     console.error(err);
-                    callback(false);
+                    callback(err, false);
                     return;
                 }
-                callback(results.affectedRows > 0);
+                callback(null, results.affectedRows > 0);
             });
         });
     }

@@ -1,13 +1,13 @@
 const model = {
-    generateAuthorizationCode: function(client: {id: string}, user: {id: number}, scope : string, callback: (code: string) => void ) {
-        callback(Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
+    generateAuthorizationCode: function(client: {id: string}, user: {id: number}, scope : string, callback: (err: any, code: string) => void ) {
+        callback(null, Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
     },
-    getAccessToken: function (token: string, callback: (token: any) => void) {
+    getAccessToken: function (token: string, callback: (err: any, token: any) => void) {
         console.log("getAccessToken");
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
-                callback(null);
+                callback(err, null);
                 return;
             }
 
@@ -17,12 +17,12 @@ const model = {
                     connection.release();
                     if (err) {
                         console.error(err);
-                        callback(null);
+                        callback(err, null);
                         return;
                     }
 
                     if (results.length !== 1) {
-                        callback(null);
+                        callback(null, {});
                         return;
                     }
 
@@ -39,17 +39,17 @@ const model = {
                         }
                     };
 
-                    callback(return_token);
+                    callback(null, return_token);
                 });
         });
     },
 
-    getRefreshToken: function (refresh: string, callback: (refresh: any) => void) {
+    getRefreshToken: function (refresh: string, callback: (err: any, refresh: any) => void) {
         console.log("getRefreshToken");
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
-                callback(null);
+                callback(err, null);
                 return;
             }
 
@@ -59,12 +59,12 @@ const model = {
                     connection.release();
                     if (err) {
                         console.error(err);
-                        callback(null);
+                        callback(err, null);
                         return;
                     }
 
                     if (results.length !== 1) {
-                        callback(null);
+                        callback(null, {});
                         return;
                     }
 
@@ -81,17 +81,17 @@ const model = {
                         }
                     };
 
-                    callback(return_token);
+                    callback(null, return_token);
                 });
         });
     },
 
-    getAuthorizationCode: function (code: string, callback: any) {
+    getAuthorizationCode: function (code: string, callback: (err: any, code: any) => void) {
         console.log("getAuthorizationCode");
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
-                callback(null);
+                callback(err, null);
                 return;
             }
 
@@ -101,12 +101,12 @@ const model = {
                     connection.release();
                     if (err) {
                         console.error(err);
-                        callback(null);
+                        callback(err, null);
                         return;
                     }
 
                     if (results.length < 1) {
-                        callback(null);
+                        callback(null, {});
                         return;
                     }
 
@@ -124,35 +124,36 @@ const model = {
                         }
                     };
 
-                    callback(return_code);
+                    callback(null, return_code);
                 }
             );
         });
     },
 
-    getClient: function (clientId: string, clientSecret: string, callback: (client: any) => void) {
+    getClient: function (clientId: string, clientSecret: string, callback: (err: any, client: any) => void) {
         console.log("getClient");
         // @ts-ignore
-        var builtInClients: {id: string, uri: string, secret: string}[] = global.config.site_oauth_secrets;
+        var builtInClients: {id: string, callback: string, secret: string}[] = global.config.site_oauth_secrets;
         for (var i = 0; i < builtInClients.length; i++) {
-            var builtInClient: {id: string, uri: string, secret: string} = builtInClients[i];
+            var builtInClient: {id: string, callback: string, secret: string} = builtInClients[i];
             if (builtInClient.id === clientId && builtInClient.secret === clientSecret) {
-                var uris = [builtInClient.uri];
-                callback({
+                var uris = [builtInClient.callback];
+                var client = {
                     "id": clientId,
                     "redirectUris": uris,
                     "grants": [
                         "refresh_token",
                         "authorization_code"
                     ]
-                });
+                };
+                callback(null, client);
                 return;
             }
         }
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
-                callback(null);
+                callback(err, null);
                 return;
             }
 
@@ -162,12 +163,12 @@ const model = {
                     if (err) {
                         connection.release();
                         console.error(err);
-                        callback(null);
+                        callback(err, null);
                         return;
                     }
 
                     if (results.length == 0) {
-                        callback(null);
+                        callback(null, {});
                         return;
                     }
 
@@ -177,7 +178,7 @@ const model = {
                             connection.release();
                             if (err) {
                                 console.error(err);
-                                callback(null);
+                                callback(err, null);
                                 return;
                             }
 
@@ -195,18 +196,18 @@ const model = {
                                 ]
                             };
 
-                            callback(client);
+                            callback(null, client);
                         });
                 });
         });
     },
 
-    saveToken: function (token: { accessToken: string; accessTokenExpiresAt: any; refreshToken: string; refreshTokenExpiresAt: any; }, client: { id: string; }, user: { id: number; }, callback: (token: any) => void) {
+    saveToken: function (token: { accessToken: string; accessTokenExpiresAt: any; refreshToken: string; refreshTokenExpiresAt: any; }, client: { id: string; }, user: { id: number; }, callback: (err: any, token: any) => void) {
         console.log("saveToken");
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
-                callback(null);
+                callback(err, null);
                 return;
             }
 
@@ -216,7 +217,7 @@ const model = {
                     connection.release();
                     if (err) {
                         console.error(err);
-                        callback(null);
+                        callback(err, null);
                         return;
                     }
 
@@ -231,17 +232,17 @@ const model = {
                         "user": user
                     };
 
-                    callback(returnToken);
+                    callback(null, returnToken);
                 });
         });
     },
 
-    saveAuthorizationCode: function (code: { authorizationCode: string; expiresAt: string; redirectUri: string }, client: { id: string; }, user: { id: number; }, callback: any) {
+    saveAuthorizationCode: function (code: { authorizationCode: string; expiresAt: string; redirectUri: string }, client: { id: string; }, user: { id: number; }, callback: (err: any, code: any) => void) {
         console.log("saveAuthorizationCode");
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
-                callback(null);
+                callback(err, null);
                 return;
             }
 
@@ -251,7 +252,7 @@ const model = {
                     connection.release();
                     if (err) {
                         console.error(err);
-                        callback(null);
+                        callback(err, null);
                         return;
                     }
 
@@ -265,18 +266,18 @@ const model = {
                         "user": user
                     };
 
-                    callback(return_code);
+                    callback(null, return_code);
                 }
             );
         });
     },
 
-    revokeToken: function (token: { client: { id: string; }; user: { id: number; }; refreshToken: string; }, callback: (success: boolean) => void) {
+    revokeToken: function (token: { client: { id: string; }; user: { id: number; }; refreshToken: string; }, callback: (err: any, success: boolean) => void) {
         console.log("revokeToken");
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
-                callback(false);
+                callback(err, false);
                 return;
             }
 
@@ -286,21 +287,21 @@ const model = {
                     connection.release();
                     if (err) {
                         console.error(err);
-                        callback(false);
+                        callback(err, false);
                         return;
                     }
 
-                    callback(results.affectedRows > 0);
+                    callback(null, results.affectedRows > 0);
                 });
         });
     },
 
-    revokeAuthorizationCode: function (code: { authorizationCode: string; }, callback: any) {
+    revokeAuthorizationCode: function (code: { authorizationCode: string; }, callback: (err: any, success: boolean) => void) {
         console.log("revokeAuthorizationCode");
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
-                callback(false);
+                callback(err, false);
                 return;
             }
 
@@ -310,11 +311,11 @@ const model = {
                     connection.release();
                     if (err) {
                         console.error(err);
-                        callback(false);
+                        callback(err, false);
                         return;
                     }
 
-                    callback(results.affectedRows > 0);
+                    callback(null, results.affectedRows > 0);
                 });
         });
     }

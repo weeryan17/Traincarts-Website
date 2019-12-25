@@ -6,7 +6,7 @@ router.oauth = new OAuthServer({
     model: oauth_model
 });
 router.get('/authorize', function (req, res, next) {
-    if (!req.user) {
+    if (req.user === undefined) {
         req.flash('messages', 'Please login');
         res.redirect('/account/login');
         return;
@@ -20,7 +20,7 @@ router.get('/authorize', function (req, res, next) {
             return;
         }
         if (client.type === "built_in") {
-            oauth_model.generateAuthorizationCode({ id: client_id }, req.user, null, function (code) {
+            oauth_model.generateAuthorizationCode({ id: client_id }, req.user, null, function (err, code) {
                 var date = new Date();
                 date.setDate(date.getDate() + 1);
                 oauth_model.saveAuthorizationCode({ authorizationCode: code, expiresAt: date.toISOString().slice(0, 19).replace('T', ' '), redirectUri: redirect }, { id: client_id }, { id: req.user.id }, function () {
@@ -38,6 +38,7 @@ router.get('/authorize', function (req, res, next) {
         });
     });
 });
+router.post('/token', router.oauth.token());
 router.get("/", function (req, res) {
     res.send("wip");
 });
