@@ -7,11 +7,6 @@
     "sourceMap": true
   },
   "include": [
-    "**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "minecraft-resource-manager-js",
-    "minecraft-three-model"
+    "src/**/*"
   ]
 }
