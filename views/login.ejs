@@ -31,7 +31,7 @@
                     <a class="nav-link" href="#signup" id="signup-button">Sign Up</a>
                 </li>
             </ul>
-            <form id="login" action="/account/login" method="post">
+            <form id="login" action="/account/login?redirect=<%= redirect %>" method="post">
                 <div class="form-group">
                     <label for="username">Username/Email</label>
                     <input type="text" class="form-control ts-form-item" id="username" placeholder="Username/Email"
@@ -45,7 +45,7 @@
                 <p><a href="/account/forgot">Forgot Password?</a></p>
                 <button type="submit" class="btn btn-primary">Login</button>
             </form>
-            <form id="signup" class="ts-hidden" action="/account/signup" method="post">
+            <form id="signup" class="ts-hidden" action="/account/signup?redirect=<%= redirect %>" method="post">
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="email" class="form-control ts-form-item" id="email" placeholder="Email" name="email"

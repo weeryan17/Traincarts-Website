@@ -12,7 +12,8 @@ router.oauth = new OAuthServer({
 router.get('/authorize', function (req: any, res: any, next: any) {
     if (req.user === undefined) {
         req.flash('messages', 'Please login');
-        res.redirect('/account/login');
+        var redirect_uri: string = req.protocol + '://' + req.host + req.originalUrl;
+        res.redirect('/account/login?redirect=' + encodeURI(redirect_uri));
         return;
     }
     var client_id = req.query.client_id;

@@ -10,7 +10,11 @@
 <br>
 <h1 class="ts-primary ts-header-card"><%= message %></h1>
 <div class="container">
-<h2><%= status %></h2>
+    <h2><%= status %></h2>
+    <% if (error !== false) { %>
+    <h3>Please report this error to the website developers</h3>
+    <code><%= error %></code>
+    <% } %>
 </div>
 </body>
 </html>

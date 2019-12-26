@@ -89,7 +89,6 @@ app.use(express.urlencoded({extended: false}));
 app.use('/public', express.static(path.join(global.appRoot, 'public')));
 
 app.use(require('cookie-parser')());
-app.use(require('body-parser').urlencoded({extended: true}));
 
 var session = require('express-session');
 var fileStore = require('session-file-store')(session);
@@ -169,12 +168,21 @@ function readRoutesDir(parent: string) {
 
 // error handler
 app.use(function (req: any, res: any) {
-    res.locals.message = "Page not found";
-    res.locals.status = 404;
+    if (res.locals.message === undefined) {
+        res.locals.message = "Page not found";
+        res.locals.status = 404;
+    }
+    var error: boolean | any = false;
+    if (res.locals.error !== undefined) {
+        error = res.locals.error;
+        if (res.locals.status === undefined) {
+            res.locals.status = 500;
+        }
+    }
 
     // render the error page
-    res.status(404);
-    res.render('error', {title: 'Error', messages: req.messages});
+    res.sendStatus(res.locals.status);
+    res.render('error', {title: 'Error', messages: req.messages, error: error});
 });
 
 module.exports = app;
