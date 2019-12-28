@@ -7,6 +7,14 @@ body {
     background-color: rgb(97, 57, 179);
 }
 
+.modal-header {
+    background-color: rgb(97, 57, 179);
+}
+
+.modal-content {
+    background: rgb(50, 50, 50);
+}
+
 .ts-secondary {
     background: rgb(55, 55, 55);
 }
@@ -55,6 +63,15 @@ body {
     margin-right: 10px;
     height: 200px;
     width: 90%;
+}
+
+.ts-info-card {
+    margin: 5px;
+    border: 1px solid rgb(97, 57, 179);
+}
+
+.ts-info-card > *:not(.ts-primary) {
+    margin: 5px;
 }
 
 .ts-text-bar {

@@ -1,0 +1,18 @@
+<html lang="en">
+<head>
+    <!--<style>
+        body {
+            background: rgb(50, 50, 50);
+            color: rgb(200, 200, 200);
+        }
+    </style>-->
+    <title>Email</title>
+</head>
+<body>
+<h2>Hello <%= username %></h2>
+<p>It seams you forgot your password. You can either enter this code into your browser, or fallow the link at the end of the email.</p>
+<p><code><%= code %></code></p>
+<a href="<%= host %>/account/forgot?email=<%= encodeURI(email) %>&code=<%= encodeURI(code) %>&redirect=<%= encodeURI(redirect) %>"><%= host %>/account/forgot?email=<%= encodeURI(email) %>&code=<%= encodeURI(code) %>&redirect=<%= encodeURI(redirect) %></a>
+<p>Note if it wasn't you who requested this email you can safely ignore it</p>
+</body>
+</html>

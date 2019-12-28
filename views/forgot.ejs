@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <%- include(appRoot + '/templates/head.ejs'); %>
+</head>
+<body>
+<header>
+    <%- include(appRoot + '/templates/header.ejs'); %>
+    <script src="/public/js/forgot.js"></script>
+</header>
+<div class="container">
+    <br>
+    <h1 class="ts-primary ts-header-card">
+        <span class="ts-text">Forgot password</span>
+    </h1>
+    <br>
+    <% if (error !== false) { %>
+        <div class="d-flex justify-content-center">
+            <div class="alert alert-danger" role="alert" style="width: 50%">
+                <%= error %>
+            </div>
+        </div>
+    <% } %>
+    <div class="d-flex justify-content-center">
+        <div class="ts-secondary ts-border" style="width: 50%">
+            <form action="/account/forgot?redirect=<%= redirect %>" method="post">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control ts-form-item" id="email" placeholder="Email"
+                           name="email" required maxlength="50" value="<%= email %>">
+                </div>
+                <div id="code-div" class="form-group" <% if (code === false) { %>style="display: none"<% } %>>
+                    <label for="code">Code</label>
+                    <input type="text" class="form-control ts-form-item" id="code" placeholder="Code from email"
+                           name="code" required <% if (code !== false) { %>value="<%= code %>"<% } %>>
+                </div>
+                <button id="email-button" type="button" class="btn btn-primary" onclick="do_email()" <% if (code !== false) { %>style="display: none" <% } %>>Send Email</button>
+                <button id="submit-button" <% if (code === false) { %>style="display: none"<% } %> type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <%- include(appRoot + '/templates/head.ejs'); %>
+</head>
+<body>
+<header>
+    <%- include(appRoot + '/templates/header.ejs'); %>
+</header>
+<div class="container">
+    <br>
+    <h1 class="ts-primary ts-header-card">
+        <span class="ts-text">Login</span>
+    </h1>
+    <br>
+    <% if (error !== false) { %>
+        <div class="d-flex justify-content-center">
+            <div class="alert alert-danger" role="alert" style="width: 50%">
+                <%= error %>
+            </div>
+        </div>
+    <% } %>
+    <div class="d-flex justify-content-center">
+        <div class="ts-secondary ts-border" style="width: 50%">
+            <form id="login" action="/account/login?redirect=<%= redirect %>" method="post">
+                <div class="form-group" style="display: none">
+                    <label for="username">Username/Email</label>
+                    <input type="text" class="form-control ts-form-item" id="username" placeholder="Username/Email"
+                           name="username" required maxlength="50" value="<%= username %>">
+                </div>
+                <div class="form-group" style="display: none">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control ts-form-item" id="password" placeholder="Password"
+                           name="password" required value="<%= password %>">
+                </div>
+                <div class="form-group">
+                    <label for="twofa_code">2fa Code</label>
+                    <input type="text" class="form-control ts-form-item" id="twofa_code" placeholder="2fa Code"
+                           name="twofa_code" required minlength="6" maxlength="6">
+                </div>
+                <p><a href="/account/login?redirect=<%= encodeURI(redirect) %>">Back to login</a></p>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

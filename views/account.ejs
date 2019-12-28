@@ -1,18 +1,150 @@
 <!DOCTYPE html>
 <html lang="en-us">
+<!--suppress HtmlRequiredTitleElement -->
 <head>
     <%- include(appRoot + '/templates/head.ejs'); %>
 </head>
 <body>
 <header>
     <%- include(appRoot + '/templates/header.ejs'); %>
+    <script src="/public/js/account.js"></script>
 </header>
 <div class="container">
     <br>
     <h1 class="ts-primary ts-header-card">
-        Account
+        Hello <%= user_info.username %>
     </h1>
-
+    <br>
+    <div class="row">
+        <div class="col-12 col-md-6">
+            <div class="row">
+                <div class="col-12">
+                    <div class="ts-info-card">
+                        <h3 class="ts-primary">Account Info</h3>
+                        <p>
+                            <span class="ts-primary"
+                                  style="width: 20%; display: inline-block; margin-right: 5px">Id</span>
+                            <span><%= user_info.id %></span>
+                        </p>
+                        <p>
+                            <span class="ts-primary" style="width: 20%; display: inline-block; margin-right: 5px">Username</span>
+                            <span><%= user_info.username %></span>
+                        </p>
+                        <p>
+                            <span class="ts-primary"
+                                  style="width: 20%; display: inline-block; margin-right: 5px">Email</span>
+                            <span><%= user_info.email %></span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="ts-info-card">
+                        <h3 class="ts-primary">Change password</h3>
+                        <form method="post" action="/account/change/password">
+                            <div class="form-group">
+                                <label for="password-old">Old Password</label>
+                                <input type="password" class="form-control ts-form-item" id="password-old"
+                                       placeholder="Old Password"
+                                       name="password_old" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="password-new">New Password</label>
+                                <input type="password" class="form-control ts-form-item" id="password-new"
+                                       placeholder="New Password"
+                                       name="password" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="password-repeat">Repeat New Password</label>
+                                <input type="password" class="form-control ts-form-item" id="password-repeat"
+                                       placeholder="Repeat Password" required
+                                       oninput="checkInputMatches(this, '#password-new', 'Passwords must match.')">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Change Password</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="row">
+                <div class="col-12">
+                    <div class="ts-info-card">
+                        <h3 class="ts-primary">2fa</h3>
+                        <% if (user_info.twofa === null) { %>
+                            <form method="post" id="twofa" action="/account/change/twofa" style="display: none">
+                                <label>
+                                    <input id="twofa-secret" style="display: none" name="secret">
+                                </label>
+                                <img id="twofa-qrcode" src="" alt="qrcode" width="0" height="0">
+                                <div class="form-group">
+                                    <label for="twofa-code">2fa Code</label>
+                                    <input type="text" class="form-control ts-form-item" id="twofa-code"
+                                           placeholder="2fa code from app" required minlength="6" maxlength="6"
+                                           name="code">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Enable 2fa</button>
+                            </form>
+                            <button id="button-twofa" class="btn btn-secondary" onclick="enable_twofa()">Enable 2fa
+                            </button>
+                        <% } else { %>
+                            <div id="remove-twofa" style="display: none" class="form-group">
+                                <label for="twofa-code">2fa Code</label>
+                                <input type="text" class="form-control ts-form-item" id="twofa-code"
+                                       placeholder="2fa code from app" required minlength="6" maxlength="6"
+                                       name="code" value="">
+                            </div>
+                            <p id="remove-error"></p>
+                            <button class="btn btn-primary" data-toggle="modal" data-target="#backup-codes">View Backup codes</button>
+                            <button class="btn btn-danger" onclick="remove_twofa()">Remove 2fa</button>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="backup-codes" class="modal" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Backup Codes</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span></button>
+            </div>
+        <div class="modal-body">
+            <%
+            for (var i = 0; i < backup_codes.length; i++) {
+                var backup_code = backup_codes[i];
+            if (i % 4 == 0) {
+            if (i > 0) {
+            %>
+        </div>
+        <% } %>
+        <div class="row">
+            <%
+            }
+            %>
+            <div class="col-3">
+                <p>
+                    <% if (backup_code.used) { %>
+                        <del><%= backup_code.code %></del>
+                    <% } else { %>
+                        <%= backup_code.code %>
+                    <% } %>
+                </p>
+            </div>
+            <%
+            }
+            %>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="window.location.href='/account/codes'">Download codes</button>
+    </div>
+</div>
 </div>
 </body>
 </html>

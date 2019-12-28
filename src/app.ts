@@ -125,7 +125,7 @@ readRoutesDir('.');
 
 function readRoutesDir(parent: string) {
     // @ts-ignore
-    var dir = path.join(global.appRoot, 'routes', parent);
+    var dir = path.join(global.appRoot, 'src/routes', parent);
     var items = fs.readdirSync(dir);
 
 
@@ -136,7 +136,7 @@ function readRoutesDir(parent: string) {
         let type: string = split[split.length - 1];
 
         if (type != 'js') {
-            if (fs.lstatSync('./routes/' + parent + '/' + item).isDirectory()) {
+            if (fs.lstatSync('./src/routes/' + parent + '/' + item).isDirectory()) {
                 if (parent == '.') {
                     readRoutesDir(item);
                 } else {
@@ -168,20 +168,20 @@ function readRoutesDir(parent: string) {
 
 // error handler
 app.use(function (req: any, res: any) {
-    if (res.locals.message === undefined) {
-        res.locals.message = "Page not found";
-        res.locals.status = 404;
+    if (req.app.locals.message === undefined) {
+        req.app.locals.message = "Page not found";
+        req.app.locals.status = 404;
     }
     var error: boolean | any = false;
-    if (res.locals.error !== undefined) {
-        error = res.locals.error;
-        if (res.locals.status === undefined) {
-            res.locals.status = 500;
+    if (req.app.locals.error !== undefined) {
+        error = req.app.locals.error;
+        if (req.app.locals.status === undefined) {
+            req.app.locals.status = 500;
         }
     }
 
     // render the error page
-    res.sendStatus(res.locals.status);
+    res.sendStatus(req.app.locals.status);
     res.render('error', {title: 'Error', messages: req.messages, error: error});
 });
 

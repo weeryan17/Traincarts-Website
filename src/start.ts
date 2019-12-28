@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-///<reference path="node_modules/@types/node/globals.d.ts"/>
 
 // @ts-ignore
 var path = require('path');
@@ -10,7 +9,7 @@ var fs = require('fs');
 var config = JSON.parse(fs.readFileSync("config.json"));
 
 // @ts-ignore
-global["appRoot"] = path.resolve(__dirname) + '/';
+global["appRoot"] = path.resolve(__dirname) + '/../';
 
 var mysql_config = config.database;
 mysql_config.typeCast = function castField( field : any, useDefaultTypeCasting : any ) {
