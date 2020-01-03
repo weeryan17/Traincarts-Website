@@ -12,6 +12,6 @@ COPY templates ./templates
 COPY public ./public
 
 COPY src ./src
-RUN tsc
+RUN tsc --build tsconfig.json
 
 CMD [ "node", "src/start.js" ]
