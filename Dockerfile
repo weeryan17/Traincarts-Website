@@ -3,6 +3,7 @@ FROM node:8
 WORKDIR /app/container
 
 COPY package*.json ./
+COPY tsconfig.json ./
 
 RUN npm install
 RUN npm install -g typescript
