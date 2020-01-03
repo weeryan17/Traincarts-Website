@@ -17,4 +17,6 @@ RUN tsc --build tsconfig.json
 
 COPY wait-for-it.sh ./
 
+RUN chmod -X wait-for-it.sh
+
 CMD [ "node", "src/start.js" ]
