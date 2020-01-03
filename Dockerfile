@@ -15,4 +15,6 @@ COPY public ./public
 COPY src ./src
 RUN tsc --build tsconfig.json
 
+COPY wait-for-it.sh ./
+
 CMD [ "node", "src/start.js" ]
