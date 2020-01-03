@@ -31,6 +31,7 @@ let oauth_default_clients: { id: string, callback: string, secret: string }[] = 
 
 for (let i = 0; i < oauth_default_clients.length; i++) {
     const num: number = i;
+    // @ts-ignore
     global.pool.getConnection(function (err: any, connection: any) {
         if (err) {
             console.error(err);

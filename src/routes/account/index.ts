@@ -23,6 +23,8 @@ router.get("/", function (req: any, res: any, next: any) {
         res.redirect('/account/login');
         return;
     }
+
+    // @ts-ignore
     global.pool.getConnection(function (err: any, connection: any) {
         if (err) {
             console.error(err);
@@ -80,6 +82,7 @@ router.post("/login", recaptcha.middleware.verify, function (req: any, res: any,
         return;
     }
 
+    // @ts-ignore
     global.pool.getConnection(function (err: any, connection: any) {
         if (err) {
             console.error(err);
@@ -264,6 +267,7 @@ router.get('/forgot', function (req: any, res: any, next: any) {
 });
 
 router.post('/forgot', function (req: any, res: any, next: any) {
+    // @ts-ignore
     global.pool.getConnection(function (err: any, connection: any) {
         if (err) {
             console.error(err);
@@ -310,6 +314,7 @@ router.post('/forgot', function (req: any, res: any, next: any) {
 });
 
 router.put('/forgot', function (req: any, res: any, next: any) {
+    // @ts-ignore
     global.pool.getConnection(function (err: any, connection: any) {
         if (err) {
             console.error(err);
@@ -364,6 +369,7 @@ router.put('/forgot', function (req: any, res: any, next: any) {
 });
 
 router.post('/password', function (req: any, res: any, next: any) {
+    // @ts-ignore
     global.pool.getConnection(function (err: any, connection: any) {
         if (err) {
             console.error(err);
@@ -538,6 +544,7 @@ router.get('/twofa', function (req: any, res: any, next: any) {
         res.redirect('/account/login');
         return;
     }
+    // @ts-ignore
     global.pool.getConnection(function (err: any, connection: any) {
         if (err) {
             console.error(err);
@@ -570,6 +577,7 @@ router.get('/twofa', function (req: any, res: any, next: any) {
 });
 
 router.delete('/twofa', function (req: any, res: any, next: any) {
+    // @ts-ignore
     global.pool.getConnection(function (err: any, connection: any) {
         if (err) {
             console.error(err);
@@ -632,6 +640,7 @@ router.delete('/twofa', function (req: any, res: any, next: any) {
 });
 
 function delete_twofa(user_id: number, callback: (success: boolean, message: string) => void) {
+    // @ts-ignore
     global.pool.getConnection(function (err: any, connection: any) {
         if (err) {
             console.error(err);
@@ -675,6 +684,7 @@ router.get('/codes', function (req: any, res: any, next: any) {
 });
 
 function getCodes(req: any, res: any, next: any, user_id: number, callback: (backup_codes: { code: string, used: boolean }[]) => void) {
+    // @ts-ignore
     global.pool.getConnection(function (err: any, connection: any) {
         if (err) {
             console.error(err);
@@ -735,6 +745,7 @@ router.get('/discord/callback', function (req: any, res: any, next: any) {
         }
         //TODO insert user discord details
         console.log(req.user.id);
+        // @ts-ignore
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
@@ -750,6 +761,7 @@ router.get('/discord/callback', function (req: any, res: any, next: any) {
 
 router.get("/info", function (req: any, res: any) {
     if (req.user !== undefined) {
+        // @ts-ignore
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);

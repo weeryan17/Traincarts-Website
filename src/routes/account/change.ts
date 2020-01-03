@@ -16,6 +16,8 @@ router.post('/twofa', function (req: any, res: any, next: any) {
         res.redirect('/account');
         return;
     }
+
+    // @ts-ignore
     global.pool.getConnection(function (err: any, connection: any) {
         if (err) {
             console.error(err);
@@ -60,6 +62,7 @@ router.post('/password', function (req: any, res: any, next: any) {
     let old_password: string = req.body.password_old;
     let new_password: string = req.body.password;
 
+    // @ts-ignore
     global.pool.getConnection(function (err: any, connection: any) {
         if (err) {
             console.error(err);

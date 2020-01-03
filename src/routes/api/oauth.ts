@@ -75,6 +75,8 @@ function get_client_from_id(clientId: string, callback: (client: any) => void) {
             return;
         }
     }
+
+    // @ts-ignore
     global.pool.getConnection(function (err: any, connection: any) {
         if (err) {
             console.error(err);

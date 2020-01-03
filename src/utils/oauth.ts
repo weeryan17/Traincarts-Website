@@ -4,6 +4,7 @@ const model = {
     },
     getAccessToken: function (token: string, callback: (err: any, token: any) => void) {
         console.log("getAccessToken");
+        // @ts-ignore
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
@@ -46,6 +47,7 @@ const model = {
 
     getRefreshToken: function (refresh: string, callback: (err: any, refresh: any) => void) {
         console.log("getRefreshToken");
+        // @ts-ignore
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
@@ -88,6 +90,7 @@ const model = {
 
     getAuthorizationCode: function (code: string, callback: (err: any, code: any) => void) {
         console.log("getAuthorizationCode");
+        // @ts-ignore
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
@@ -150,6 +153,7 @@ const model = {
                 return;
             }
         }
+        // @ts-ignore
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
@@ -204,6 +208,7 @@ const model = {
 
     saveToken: function (token: { accessToken: string; accessTokenExpiresAt: any; refreshToken: string; refreshTokenExpiresAt: any; }, client: { id: string; }, user: { id: number; }, callback: (err: any, token: any) => void) {
         console.log("saveToken");
+        // @ts-ignore
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
@@ -239,6 +244,7 @@ const model = {
 
     saveAuthorizationCode: function (code: { authorizationCode: string; expiresAt: string; redirectUri: string }, client: { id: string; }, user: { id: number; }, callback: (err: any, code: any) => void) {
         console.log("saveAuthorizationCode");
+        // @ts-ignore
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
@@ -274,6 +280,7 @@ const model = {
 
     revokeToken: function (token: { client: { id: string; }; user: { id: number; }; refreshToken: string; }, callback: (err: any, success: boolean) => void) {
         console.log("revokeToken");
+        // @ts-ignore
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
@@ -298,6 +305,7 @@ const model = {
 
     revokeAuthorizationCode: function (code: { authorizationCode: string; }, callback: (err: any, success: boolean) => void) {
         console.log("revokeAuthorizationCode");
+        // @ts-ignore
         global.pool.getConnection(function (err: any, connection: any) {
             if (err) {
                 console.error(err);
