@@ -27,5 +27,12 @@
       "callback": "",
       "secret": ""
     }
-  ]
+  ],
+  "redis": {
+    "_info": "Implement these options to fit your needs https://github.com/NodeRedis/node_redis#options-object-properties"
+  },
+  "recaptcha": {
+    "site": "SITE_KEY",
+    "secret": "SECRET_KEY"
+  }
 }
