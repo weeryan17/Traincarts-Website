@@ -65,7 +65,7 @@ for (let i = 0; i < oauth_default_clients.length; i++) {
 /**
  * Module dependencies.
  */
-
+// @ts-ignore
 let app = require('./app.js');
 let debug = require('debug')('site:server');
 let http = require('http');

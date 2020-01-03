@@ -2,6 +2,7 @@
 let express = require('express');
 let oauth_model = require('../../utils/oauth');
 let OAuthServer = require('express-oauth-server');
+// @ts-ignore
 let router = express.Router();
 
 router.oauth = new OAuthServer({

@@ -1,8 +1,12 @@
+// @ts-ignore
 let twoFactor = require('node-2fa');
+// @ts-ignore
 let bcrypt = require('bcrypt');
+// @ts-ignore
 let utils = require('../../utils/utils.js');
 // @ts-ignore
 let express = require('express');
+// @ts-ignore
 let router = express.Router();
 
 router.post('/twofa', function (req: any, res: any, next: any) {

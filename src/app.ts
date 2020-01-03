@@ -8,6 +8,7 @@ const flash = require('connect-flash');
 // @ts-ignore
 const passport = require('passport');
 let localStrategy = require("passport-local");
+// @ts-ignore
 let bcrypt = require('bcrypt');
 let discordStrategy = require('passport-discord').Strategy;
 
@@ -83,6 +84,7 @@ global["passport"] = passport;
 const fs = require('fs');
 //const formidableMiddleware = require('express-formidable');
 
+// @ts-ignore
 let app = express();
 
 app.set('view engine', 'ejs');
