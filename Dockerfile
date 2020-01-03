@@ -5,10 +5,13 @@ WORKDIR /app/container
 COPY package*.json ./
 
 RUN npm install
+RUN npm install -g typescript
 
 COPY views ./views
 COPY templates ./templates
-COPY src ./src
 COPY public ./public
+
+COPY src ./src
+RUN tsc
 
 CMD [ "node", "src/start.js" ]
