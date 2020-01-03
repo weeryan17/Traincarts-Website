@@ -1,12 +1,12 @@
-var twoFactor = require('node-2fa');
-var bcrypt = require('bcrypt');
-var utils = require('../../utils/utils.js');
+let twoFactor = require('node-2fa');
+let bcrypt = require('bcrypt');
+let utils = require('../../utils/utils.js');
 // @ts-ignore
-var express = require('express');
-var router = express.Router();
+let express = require('express');
+let router = express.Router();
 
 router.post('/twofa', function (req: any, res: any, next: any) {
-    var delta: number | null = twoFactor.verifyToken(req.body.secret, req.body.code).delta;
+    let delta: number | null = twoFactor.verifyToken(req.body.secret, req.body.code).delta;
     if (delta !== 0) {
         req.flash('messages', 'Invalid code');
         res.redirect('/account');
@@ -32,9 +32,9 @@ router.post('/twofa', function (req: any, res: any, next: any) {
                     return;
                 }
 
-                for (var i = 0; i < 12; i++) {
-                    var code: string = "";
-                    for (var i2 = 0; i2 < 6; i2++) {
+                for (let i = 0; i < 12; i++) {
+                    let code: string = "";
+                    for (let i2 = 0; i2 < 6; i2++) {
                         code += getRandomInt(0, 10);
                     }
                     connection.query("INSERT INTO user_backup_codes (user_id, backup_code) VALUES (?, ?)",
@@ -53,8 +53,8 @@ router.post('/twofa', function (req: any, res: any, next: any) {
 });
 
 router.post('/password', function (req: any, res: any, next: any) {
-    var old_password: string = req.body.password_old;
-    var new_password: string = req.body.password;
+    let old_password: string = req.body.password_old;
+    let new_password: string = req.body.password;
 
     global.pool.getConnection(function (err: any, connection: any) {
         if (err) {
@@ -76,7 +76,7 @@ router.post('/password', function (req: any, res: any, next: any) {
                     return;
                 }
 
-                var user = results[0];
+                let user = results[0];
                 // noinspection JSFunctionExpressionToArrowFunction,TypescriptExplicitMemberType
                 bcrypt.compare(old_password, user.password, function (err: any, bcrypt_res: any) {
                     if (err) {

@@ -1,15 +1,22 @@
 // @ts-ignore
-var passport = global.passport;
-var bcrypt = require('bcrypt');
+let passport = global.passport;
+// @ts-ignore
+let bcrypt = require('bcrypt');
 
-var randomString = require('randomstring');
-var twoFactor = require('node-2fa');
+let randomString = require('randomstring');
+// @ts-ignore
+let twoFactor = require('node-2fa');
+// @ts-ignore
+let utils = require('../../utils/utils.js');
 
-var utils = require('../../utils/utils.js');
+let Recaptcha = require('express-recaptcha').RecaptchaV2;
+// @ts-ignore
+let recaptcha = new Recaptcha(global.config.recaptcha.site, global.config.recaptcha.secret);
 
 // @ts-ignore
-var express = require('express');
-var router = express.Router();
+let express = require('express');
+// @ts-ignore
+let router = express.Router();
 
 router.get("/", function (req: any, res: any, next: any) {
     if (req.user === undefined) {
@@ -35,7 +42,7 @@ router.get("/", function (req: any, res: any, next: any) {
                     next();
                     return;
                 }
-                var user_info: { id: number, username: string, email: string, twofa: number } = results[0];
+                let user_info: { id: number, username: string, email: string, twofa: number } = results[0];
                 getCodes(req, res, next, req.user.id, function (backup_codes) {
                     res.render('account', {
                         title: 'Account',
@@ -48,20 +55,31 @@ router.get("/", function (req: any, res: any, next: any) {
     });
 });
 
-router.get("/login", function (req: any, res: any) {
-    var redirect: string = "/";
+router.get("/login", recaptcha.middleware.renderWith({theme: "dark"}), function (req: any, res: any) {
+    let redirect: string = "/";
     if (req.query.redirect !== undefined) {
         redirect = req.query.redirect;
     }
-    var error: boolean | string = false;
-    var flash: string[] = req.flash('error');
+    let error: boolean | string = false;
+    let flash: string[] = req.flash('error');
     if (flash.length > 0) {
         error = flash[0];
     }
-    res.render('login', {title: 'Login', error: error, messages: req.messages, redirect: redirect});
+    res.render('login', {title: 'Login', error: error, messages: req.messages, redirect: redirect, captcha: res.recaptcha});
 });
 
-router.post("/login", function (req: any, res: any, next: any) {
+router.post("/login", recaptcha.middleware.verify, function (req: any, res: any, next: any) {
+    if (req.recaptcha.error) {
+        if (req.recaptcha.error === "invalid-json-response") {
+            req.app.locals.message = "Error while logging in account";
+            next();
+        } else {
+            req.flash('error', "Please solve captcha");
+            res.redirect('/account/login?redirect=' + encodeURIComponent(req.query.redirect));
+        }
+        return;
+    }
+
     global.pool.getConnection(function (err: any, connection: any) {
         if (err) {
             console.error(err);
@@ -70,6 +88,7 @@ router.post("/login", function (req: any, res: any, next: any) {
             next();
             return;
         }
+
         connection.query("SELECT id FROM traincarts_users WHERE username = ? OR email = ?", [req.body.username, req.body.username], function (err: any, results: any) {
             if (err) {
                 connection.release();
@@ -82,11 +101,11 @@ router.post("/login", function (req: any, res: any, next: any) {
 
             if (results.length == 0) {
                 req.flash('error', "Incorrect username/email");
-                res.redirect('/account/login?redirect=' + encodeURI(req.query.redirect));
+                res.redirect('/account/login?redirect=' + encodeURIComponent(req.query.redirect));
                 return;
             }
 
-            var id = results[0].id;
+            let id = results[0].id;
 
             connection.query("SELECT twofa_secret FROM user_twofa WHERE user_id = ?", [id], function (err: any, results: any) {
                 if (err) {
@@ -104,8 +123,8 @@ router.post("/login", function (req: any, res: any, next: any) {
                 }
 
                 if (req.body.twofa_code === undefined) {
-                    var error: boolean | string = false;
-                    var flash: string[] = req.flash('error');
+                    let error: boolean | string = false;
+                    let flash: string[] = req.flash('error');
                     if (flash.length > 0) {
                         error = flash[0];
                     }
@@ -124,10 +143,10 @@ router.post("/login", function (req: any, res: any, next: any) {
                     authenticate(req, res, next);
                 } else {
                     getCodes(req, res, next, id, function (backup_codes) {
-                        var is_backup: boolean = false;
-                        var backup: string = "";
-                        for (var i = 0; i < backup_codes.length; i++) {
-                            var backup_code: { code: string, used: boolean } = backup_codes[i];
+                        let is_backup: boolean = false;
+                        let backup: string = "";
+                        for (let i = 0; i < backup_codes.length; i++) {
+                            let backup_code: { code: string, used: boolean } = backup_codes[i];
                             if (!backup_code.used) {
                                 if (backup_code.code == req.body.twofa_code) {
                                     is_backup = true;
@@ -137,7 +156,7 @@ router.post("/login", function (req: any, res: any, next: any) {
                         }
                         if (!is_backup) {
                             req.flash('error', "Invalid 2fa code");
-                            res.redirect('/account/login?redirect=' + encodeURI(req.query.redirect));
+                            res.redirect('/account/login?redirect=' + encodeURIComponent(req.query.redirect));
                             return;
                         }
 
@@ -171,7 +190,7 @@ function authenticate(req: any, res: any, next: any) {
         }
         if (!user) {
             req.flash('error', info.message);
-            return res.redirect('/account/login?redirect=' + encodeURI(req.query.redirect));
+            return res.redirect('/account/login?redirect=' + encodeURIComponent(req.query.redirect));
         }
         req.login(user, function (err: any) {
             if (err) {
@@ -187,7 +206,7 @@ function authenticate(req: any, res: any, next: any) {
 }
 
 router.get('/activate', function (req: any, res: any, next: any) {
-    var key: string | undefined = req.query.code;
+    let key: string | undefined = req.query.code;
 
     if (key === undefined) {
         res.redirect('/');
@@ -215,22 +234,22 @@ router.get('/activate', function (req: any, res: any, next: any) {
             }
 
             req.flash('messages', 'Account activated');
-            res.redirect('/account/login?redirect=' + encodeURI(req.query.redirect));
+            res.redirect('/account/login?redirect=' + encodeURIComponent(req.query.redirect));
         });
     });
 });
 
 router.get('/forgot', function (req: any, res: any, next: any) {
-    var error: boolean | string = false;
-    var flash: string[] = req.flash('error');
+    let error: boolean | string = false;
+    let flash: string[] = req.flash('error');
     if (flash.length > 0) {
         error = flash[0];
     }
-    var email = "";
+    let email = "";
     if (req.query.email !== undefined) {
         email = req.query.email;
     }
-    var code = false;
+    let code = false;
     if (req.query.code !== undefined) {
         code = req.query.code;
     }
@@ -268,14 +287,14 @@ router.post('/forgot', function (req: any, res: any, next: any) {
 
                 if (results.length == 0) {
                     req.flash('error', 'Why?');
-                    res.redirect('/account/login?redirect=' + encodeURI(req.query.redirect));
+                    res.redirect('/account/login?redirect=' + encodeURIComponent(req.query.redirect));
                     return;
                 }
 
-                var id = results[0].id;
+                let id = results[0].id;
                 if (results[0].recovery_key != req.body.code) {
                     req.flash('error', 'Invalid recovery key');
-                    res.redirect('/account/login?redirect=' + encodeURI(req.query.redirect));
+                    res.redirect('/account/login?redirect=' + encodeURIComponent(req.query.redirect));
                     return;
                 }
 
@@ -313,9 +332,9 @@ router.put('/forgot', function (req: any, res: any, next: any) {
                     return;
                 }
 
-                var id: number = results[0].id;
-                var username: string = results[0].username;
-                var code = randomString.generate(20);
+                let id: number = results[0].id;
+                let username: string = results[0].username;
+                let code = randomString.generate(20);
                 connection.query("UPDATE traincarts_users SET recovery_key = ? WHERE id = ?",
                     [code, id],
                     function (err: any) {
@@ -368,13 +387,13 @@ router.post('/password', function (req: any, res: any, next: any) {
 
                 if (results.length == 0) {
                     req.flash('error', 'Why?');
-                    res.redirect('/account/login?redirect=' + encodeURI(req.query.redirect));
+                    res.redirect('/account/login?redirect=' + encodeURIComponent(req.query.redirect));
                     return;
                 }
 
                 if (results[0].recovery_key != req.body.key) {
                     req.flash('error', 'Invalid recovery key');
-                    res.redirect('/account/login?redirect=' + encodeURI(req.query.redirect));
+                    res.redirect('/account/login?redirect=' + encodeURIComponent(req.query.redirect));
                     return;
                 }
 
@@ -400,17 +419,28 @@ router.post('/password', function (req: any, res: any, next: any) {
                             }
 
                             req.flash('messages', "Password changed");
-                            res.redirect('/account/login?redirect=' + encodeURI(req.query.redirect));
+                            res.redirect('/account/login?redirect=' + encodeURIComponent(req.query.redirect));
                         });
                 });
             });
     });
 });
 
-router.post("/signup", function (req: any, res: any, next: any) {
-    var email: string = req.body.email;
-    var username: string = req.body.username;
-    var password: string = req.body.password;
+router.post("/signup", recaptcha.middleware.verify, function (req: any, res: any, next: any) {
+    if (req.recaptcha.error) {
+        if (req.recaptcha.error === "invalid-json-response") {
+            req.app.locals.message = "Error while creating account";
+            next();
+        } else {
+            req.flash('error', "Please solve captcha");
+            res.redirect('/account/login?redirect=' + encodeURIComponent(req.query.redirect));
+        }
+        return;
+    }
+
+    let email: string = req.body.email;
+    let username: string = req.body.username;
+    let password: string = req.body.password;
     //@ts-ignore
     global.pool.getConnection(function (err: any, connection: any) {
         if (err) {
@@ -432,7 +462,7 @@ router.post("/signup", function (req: any, res: any, next: any) {
                 return;
             }
 
-            var activationKey = randomString.generate(20);
+            let activationKey = randomString.generate(20);
             connection.query("SELECT sum(if(username = ?, 1, 0)) as 'usernames', sum(if(email = ?, 1, 0)) as 'emails' FROM traincarts_users", [username, email], function (err: any, results: any) {
                 if (err) {
                     console.error(err);
@@ -443,7 +473,7 @@ router.post("/signup", function (req: any, res: any, next: any) {
                     return;
                 }
 
-                var result: any = results[0];
+                let result: any = results[0];
                 if (result.usernames > 0) {
                     req.flash('error', 'Username taken!');
                     res.redirect('/account/login#signup');
@@ -468,7 +498,7 @@ router.post("/signup", function (req: any, res: any, next: any) {
                         return;
                     }
 
-                    var id: number = result.insertId;
+                    let id: number = result.insertId;
 
                     utils.sendHtmlMailFromTemplate(email, "Traincarts Accounts", "Activate Account", "activate", {
                         user: username,
@@ -528,12 +558,12 @@ router.get('/twofa', function (req: any, res: any, next: any) {
                     return;
                 }
 
-                var user_info: { id: number, username: string, email: string, twofa: number } = results[0];
+                let user_info: { id: number, username: string, email: string, twofa: number } = results[0];
                 if (user_info.twofa !== null) {
                     res.json({error: "2fa already enabled"});
                     return;
                 }
-                var account_name: string = user_info.username + " (" + user_info.email + ")";
+                let account_name: string = user_info.username + " (" + user_info.email + ")";
                 res.json(twoFactor.generateSecret({name: "Traincarts website", account: account_name}));
             });
     });
@@ -561,13 +591,13 @@ router.delete('/twofa', function (req: any, res: any, next: any) {
                     res.json({error: "Cannot remove 2fa if your not using it"});
                     return;
                 }
-                var twofa = twoFactor.verifyToken(results[0].twofa_secret, req.body.code, 1);
+                let twofa = twoFactor.verifyToken(results[0].twofa_secret, req.body.code, 1);
                 if (twofa != null && twofa.delta !== 0) {
                     getCodes(req, res, next, req.user.id, function (backup_codes) {
-                        var is_backup: boolean = false;
-                        var backup: string = "";
-                        for (var i = 0; i < backup_codes.length; i++) {
-                            var backup_code: { code: string, used: boolean } = backup_codes[i];
+                        let is_backup: boolean = false;
+                        let backup: string = "";
+                        for (let i = 0; i < backup_codes.length; i++) {
+                            let backup_code: { code: string, used: boolean } = backup_codes[i];
                             if (!backup_code.used) {
                                 if (backup_code.code == req.body.twofa_code) {
                                     is_backup = true;
@@ -632,9 +662,9 @@ function delete_twofa(user_id: number, callback: (success: boolean, message: str
 
 router.get('/codes', function (req: any, res: any, next: any) {
     getCodes(req, res, next, req.user.id, function (backup_codes) {
-        var codes_str: string = "";
-        for (var i = 0; i < backup_codes.length; i++) {
-            var backup_code: { code: string, used: boolean } = backup_codes[i];
+        let codes_str: string = "";
+        for (let i = 0; i < backup_codes.length; i++) {
+            let backup_code: { code: string, used: boolean } = backup_codes[i];
             if (!backup_code.used) {
                 codes_str += backup_codes[i].code + "\n";
             }
@@ -665,9 +695,9 @@ function getCodes(req: any, res: any, next: any, user_id: number, callback: (bac
                     next();
                     return;
                 }
-                var backup_codes: { code: string, used: boolean }[] = [];
-                for (var i = 0; i < results.length; i++) {
-                    var result: { backup_code: string, used: boolean } = results[i];
+                let backup_codes: { code: string, used: boolean }[] = [];
+                for (let i = 0; i < results.length; i++) {
+                    let result: { backup_code: string, used: boolean } = results[i];
 
                     backup_codes.push({code: result.backup_code, used: result.used});
                 }
@@ -676,14 +706,22 @@ function getCodes(req: any, res: any, next: any, user_id: number, callback: (bac
     });
 }
 
-router.get('/discord', passport.authenticate('discord', {scope: "identify"}));
+router.get('/discord', function (req: any, res: any, next: any) {
+    if (!req.user) {
+        res.redirect('/account/login?redirect=' + encodeURIComponent('/account/discord'));
+        return;
+    }
+    passport.authenticate('discord', {scope: "identify"})(req, res, next);
+});
 
 router.get('/discord/callback', function (req: any, res: any, next: any) {
     console.log("Discord - router");
     passport.authenticate('discord', function (err: any, user: any, info: any) {
         if (err) {
             console.error(err);
-            res.redirect('/');
+            req.app.locals.error = err;
+            req.app.locals.message = "Error while linking to discord";
+            next();
             return;
         }
         if (!user) {
@@ -692,11 +730,21 @@ router.get('/discord/callback', function (req: any, res: any, next: any) {
         }
 
         if (!req.user) {
-            res.redirect('/account/login');
+            res.redirect('/account/login?redirect=' + encodeURIComponent('/account/discord'));
             return;
         }
         //TODO insert user discord details
         console.log(req.user.id);
+        global.pool.getConnection(function (err: any, connection: any) {
+            if (err) {
+                console.error(err);
+                req.app.locals.error = err;
+                req.app.locals.message = "Error while linking to discord";
+                next();
+                return;
+            }
+            res.redirect('/account');
+        });
     })(req, res, next);
 });
 
@@ -728,7 +776,7 @@ router.get("/info", function (req: any, res: any) {
                     return;
                 }
 
-                var user = results[0];
+                let user = results[0];
                 res.json({
                     login: true,
                     id: req.user.id,

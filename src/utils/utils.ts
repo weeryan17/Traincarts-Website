@@ -1,9 +1,9 @@
-var ejs = require('ejs');
-var nodeMailer = require('nodemailer');
+let ejs = require('ejs');
+let nodeMailer = require('nodemailer');
 // @ts-ignore
-var fs = require('fs');
+let fs = require('fs');
 
-var mail : any = config.mail;
+let mail : any = config.mail;
 
 function sendHtmlMailFromTemplate(toAddress: string, fromName : string, subject: string, templateFile : string, data : any, callback : (err : boolean | any) => void) {
     // @ts-ignore
@@ -15,10 +15,10 @@ function sendHtmlMailFromTemplate(toAddress: string, fromName : string, subject:
         }
         console.log(content);
 
-        var html : string = ejs.render(content, data);
+        let html : string = ejs.render(content, data);
 
-        var secure : boolean = mail.port == 465;
-        var transport = nodeMailer.createTransport({
+        let secure : boolean = mail.port == 465;
+        let transport = nodeMailer.createTransport({
             host: mail.host,
             port: mail.port,
             secure: secure,

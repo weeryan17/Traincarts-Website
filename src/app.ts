@@ -1,4 +1,4 @@
-var createError = require('http-errors');
+let createError = require('http-errors');
 // @ts-ignore
 const express = require('express');
 // @ts-ignore
@@ -7,9 +7,9 @@ const logger = require('morgan');
 const flash = require('connect-flash');
 // @ts-ignore
 const passport = require('passport');
-var localStrategy = require("passport-local");
-var bcrypt = require('bcrypt');
-var discordStrategy = require('passport-discord').Strategy;
+let localStrategy = require("passport-local");
+let bcrypt = require('bcrypt');
+let discordStrategy = require('passport-discord').Strategy;
 
 passport.serializeUser(function(user : any, done : any) {
     done(null, user);
@@ -30,12 +30,19 @@ passport.use(new localStrategy(function (username: string, password: string, don
         }
 
         connection.query("SELECT id, password, account_activated FROM traincarts_users WHERE username = ? OR email = ?", [username, username], function (error: any, results: any) {
+            connection.release();
+            if(err) {
+                console.error(err);
+                done(err);
+                return;
+            }
+
             if (results.length < 1) {
                 done(null, false, {message: "Incorrect username"});
                 return;
             }
 
-            var user = results[0];
+            let user = results[0];
 
             bcrypt.compare(password, user.password, function (err: any, res: any) {
                 if (err) {
@@ -55,8 +62,6 @@ passport.use(new localStrategy(function (username: string, password: string, don
                     done(null, false, {message: 'Incorrect password'});
                 }
             });
-
-            connection.release();
         });
     });
 }));
@@ -78,7 +83,7 @@ global["passport"] = passport;
 const fs = require('fs');
 //const formidableMiddleware = require('express-formidable');
 
-var app = express();
+let app = express();
 
 app.set('view engine', 'ejs');
 
@@ -90,11 +95,19 @@ app.use('/public', express.static(path.join(global.appRoot, 'public')));
 
 app.use(require('cookie-parser')());
 
-var session = require('express-session');
-var fileStore = require('session-file-store')(session);
+let redis = require('redis');
+// @ts-ignore
+let redisClient = redis.createClient(global.config.redis);
+
+redisClient.on("error", function (err: any) {
+    console.error(err);
+});
+
+let session = require('express-session');
+let redisStore = require('connect-redis')(session);
 
 app.use(session({
-    store: new fileStore({}),
+    store: new redisStore({client: redisClient}),
     secret: config.session.secret
 }));
 
@@ -104,9 +117,9 @@ app.use(passport.session());
 //app.use(formidableMiddleware());
 
 app.use(function (req: any, res: any , next: any) {
-    var messages: boolean | string[] = false;
-    var flashMessages : string[] = req.flash('messages');
-    var flashSuccess : string[] = req.flash('success');
+    let messages: boolean | string[] = false;
+    let flashMessages : string[] = req.flash('messages');
+    let flashSuccess : string[] = req.flash('success');
     if (flashMessages.length > 0) {
         messages = flashMessages;
     }
@@ -125,13 +138,13 @@ readRoutesDir('.');
 
 function readRoutesDir(parent: string) {
     // @ts-ignore
-    var dir = path.join(global.appRoot, 'src/routes', parent);
-    var items = fs.readdirSync(dir);
+    let dir = path.join(global.appRoot, 'src/routes', parent);
+    let items = fs.readdirSync(dir);
 
 
     for (let i: number = 0; i < items.length; i++) {
         let item: string = items[i];
-        var split: string[] = item.split('.');
+        let split: string[] = item.split('.');
         let name: string = item.split('.')[0];
         let type: string = split[split.length - 1];
 
@@ -152,11 +165,11 @@ function readRoutesDir(parent: string) {
             name = '';
         }
 
-        var router_path = './routes/' + parent + '/' + item;
+        let router_path = './routes/' + parent + '/' + item;
 
         console.log(router_path);
 
-        var router = require(router_path);
+        let router = require(router_path);
 
         if (parent == '.') {
             app.use('/' + name, router);
@@ -172,7 +185,7 @@ app.use(function (req: any, res: any) {
         req.app.locals.message = "Page not found";
         req.app.locals.status = 404;
     }
-    var error: boolean | any = false;
+    let error: boolean | any = false;
     if (req.app.locals.error !== undefined) {
         error = req.app.locals.error;
         if (req.app.locals.status === undefined) {

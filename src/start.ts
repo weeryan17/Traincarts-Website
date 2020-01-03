@@ -1,34 +1,24 @@
 #!/usr/bin/env node
 
 // @ts-ignore
-var path = require('path');
-var mysql = require('mysql');
+let path = require('path');
+let mysql = require('mysql');
 // @ts-ignore
-var fs = require('fs');
+let fs = require('fs');
 
-var config = JSON.parse(fs.readFileSync("config.json"));
+let config = JSON.parse(fs.readFileSync("config.json"));
 
 // @ts-ignore
 global["appRoot"] = path.resolve(__dirname) + '/../';
 
-var mysql_config = config.database;
-mysql_config.typeCast = function castField( field : any, useDefaultTypeCasting : any ) {
-
-    // We only want to cast bit fields that have a single-bit in them. If the field
-    // has more than one bit, then we cannot assume it is supposed to be a Boolean.
-    if ( ( field.type === "BIT" ) && ( field.length === 1 ) ) {
-
-        var bytes = field.buffer();
-
-        // A Buffer in Node represents a collection of 8-bit unsigned integers.
-        // Therefore, our single "bit field" comes back as the bits '0000 0001',
-        // which is equivalent to the number 1.
-        return( bytes[ 0 ] === 1 );
-
+let mysql_config = config.database;
+mysql_config.typeCast = function castField(field: any, useDefaultTypeCasting: any) {
+    if ((field.type === "BIT") && (field.length === 1)) {
+        let bytes = field.buffer();
+        return (bytes[0] === 1);
     }
 
-    return( useDefaultTypeCasting() );
-
+    return (useDefaultTypeCasting());
 };
 
 // @ts-ignore
@@ -36,58 +26,62 @@ global["pool"] = mysql.createPool(mysql_config);
 // @ts-ignore
 global["config"] = config;
 
-var oauth_default_clients: {id: string, callback: string, secret: string}[] = config.site_oauth_secrets;
+let oauth_default_clients: { id: string, callback: string, secret: string }[] = config.site_oauth_secrets;
 
-global.pool.getConnection(function (err: any, connection: any) {
-    if (err) {
-        console.error(err);
-        return;
-    }
 
-    for (var i = 0; i < oauth_default_clients.length; i++) {
-        var defaultClient: {id: string, callback: string, secret: string} = oauth_default_clients[i];
-        const number = i;
+for (let i = 0; i < oauth_default_clients.length; i++) {
+    const num: number = i;
+    global.pool.getConnection(function (err: any, connection: any) {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        let defaultClient: { id: string, callback: string, secret: string } = oauth_default_clients[num];
+        const number = num;
         connection.query("SELECT COUNT(client_id) as 'clients' FROM oauth_clients WHERE client_id = ?",
             [defaultClient.id],
             function (err: any, results: any) {
                 if (err) {
-                    console.log(err);
+                    connection.release();
+                    console.error(err);
                     return;
                 }
-                var defaultClient: {id: string, callback: string, secret: string} = oauth_default_clients[number];
+                let defaultClient: { id: string, callback: string, secret: string } = oauth_default_clients[number];
                 if (results[0].clients == 0) {
                     connection.query("INSERT INTO oauth_clients (client_id, client_name, client_secret) VALUES (?, ?, ?)",
-                        [defaultClient.id, 'Traincarts', defaultClient.secret], function (err: any) {
+                        [defaultClient.id, 'Traincarts', defaultClient.secret],
+                        function (err: any) {
+                            connection.release();
                             if (err) {
-                                console.log(err);
+                                console.error(err);
                                 return;
                             }
                         });
                 }
             });
-    }
-});
+    });
+}
 
 /**
  * Module dependencies.
  */
 
-var app = require('./app.js');
-var debug = require('debug')('site:server');
-var http = require('http');
+let app = require('./app.js');
+let debug = require('debug')('site:server');
+let http = require('http');
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+let port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 /**
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+let server = http.createServer(app);
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -102,7 +96,7 @@ server.on('listening', onListening);
  */
 
 function normalizePort(val: string) {
-    var port = parseInt(val, 10);
+    let port = parseInt(val, 10);
 
     if (isNaN(port)) {
         // named pipe
@@ -126,7 +120,7 @@ function onError(error: { syscall: string; code: any; }) {
         throw error;
     }
 
-    var bind = typeof port === 'string'
+    let bind = typeof port === 'string'
         ? 'Pipe ' + port
         : 'Port ' + port;
 
@@ -150,8 +144,8 @@ function onError(error: { syscall: string; code: any; }) {
  */
 
 function onListening() {
-    var addr = server.address();
-    var bind = typeof addr === 'string'
+    let addr = server.address();
+    let bind = typeof addr === 'string'
         ? 'pipe ' + addr
         : 'port ' + addr.port;
     debug('Listening on ' + bind);

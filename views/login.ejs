@@ -31,7 +31,7 @@
                     <a class="nav-link" href="#signup" id="signup-button">Sign Up</a>
                 </li>
             </ul>
-            <form id="login" action="/account/login?redirect=<%= encodeURI(redirect) %>" method="post">
+            <form id="login" action="/account/login?redirect=<%= encodeURIComponent(redirect) %>" method="post">
                 <div class="form-group">
                     <label for="username">Username/Email</label>
                     <input type="text" class="form-control ts-form-item" id="username" placeholder="Username/Email"
@@ -43,6 +43,7 @@
                            name="password" required>
                 </div>
                 <p><a href="/account/forgot?redirect=<%= encodeURI(redirect) %>">Forgot Password?</a></p>
+                <%- captcha %>
                 <button type="submit" class="btn btn-primary">Login</button>
             </form>
             <form id="signup" class="ts-hidden" action="/account/signup?redirect=<%= redirect %>" method="post">
@@ -67,6 +68,7 @@
                     <input type="password" class="form-control ts-form-item" id="password-repeat"
                            placeholder="Repeat Password" required oninput="checkInputMatches(this, '#password-signup', 'Passwords must match.')">
                 </div>
+                <%- captcha %>
                 <button type="submit" class="btn btn-primary">Sign Up</button>
             </form>
         </div>

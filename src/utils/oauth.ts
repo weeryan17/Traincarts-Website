@@ -133,12 +133,12 @@ const model = {
     getClient: function (clientId: string, clientSecret: string, callback: (err: any, client: any) => void) {
         console.log("getClient");
         // @ts-ignore
-        var builtInClients: {id: string, callback: string, secret: string}[] = global.config.site_oauth_secrets;
-        for (var i = 0; i < builtInClients.length; i++) {
-            var builtInClient: {id: string, callback: string, secret: string} = builtInClients[i];
+        let builtInClients: {id: string, callback: string, secret: string}[] = global.config.site_oauth_secrets;
+        for (let i = 0; i < builtInClients.length; i++) {
+            let builtInClient: {id: string, callback: string, secret: string} = builtInClients[i];
             if (builtInClient.id === clientId && builtInClient.secret === clientSecret) {
-                var uris = [builtInClient.callback];
-                var client = {
+                let uris = [builtInClient.callback];
+                let client = {
                     "id": clientId,
                     "redirectUris": uris,
                     "grants": [
@@ -221,7 +221,7 @@ const model = {
                         return;
                     }
 
-                    var returnToken = {
+                    let returnToken = {
                         "accessToken": token.accessToken,
                         "accessTokenExpiresAt": token.accessTokenExpiresAt,
                         "refreshToken": token.refreshToken,

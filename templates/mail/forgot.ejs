@@ -1,15 +1,59 @@
 <html lang="en">
 <head>
-    <!--<style>
-        body {
-            background: rgb(50, 50, 50);
-            color: rgb(200, 200, 200);
+    <style>
+
+        .ts-primary {
+            background-color: rgb(97, 57, 179);
         }
-    </style>-->
+
+        .ts-secondary {
+            background: rgb(55, 55, 55);
+        }
+
+        .ts-border {
+            border: 1px solid rgb(150, 150, 150);
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .ts-header-card {
+            margin-left: 5%;
+            padding: 5px 40px 5px 5px;
+            display: inline-block;
+        }
+
+        .ts-main-card {
+            margin-left: 5px;
+            padding: 5px 40px 5px 5px;
+            display: inline-block;
+        }
+
+        .ts-card {
+            margin-left: 10px;
+            margin-right: 10px;
+            height: 200px;
+            width: 90%;
+        }
+
+        .ts-info-card {
+            margin: 5px;
+            border: 1px solid rgb(97, 57, 179);
+        }
+
+        .ts-info-card > *:not(.ts-primary) {
+            margin: 5px;
+        }
+
+        .alert-danger {
+            background: rgb(100, 50, 50);
+            color: black;
+            border-color: red;
+        }
+    </style>
     <title>Email</title>
 </head>
 <body>
-<h2>Hello <%= username %></h2>
+<h2 class="ts-primary ts-header-card">Hello <%= username %></h2>
 <p>It seams you forgot your password. You can either enter this code into your browser, or fallow the link at the end of the email.</p>
 <p><code><%= code %></code></p>
 <a href="<%= host %>/account/forgot?email=<%= encodeURI(email) %>&code=<%= encodeURI(code) %>&redirect=<%= encodeURI(redirect) %>"><%= host %>/account/forgot?email=<%= encodeURI(email) %>&code=<%= encodeURI(code) %>&redirect=<%= encodeURI(redirect) %></a>

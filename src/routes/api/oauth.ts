@@ -1,8 +1,8 @@
 // @ts-ignore
-var express = require('express');
-var oauth_model = require('../../utils/oauth');
-var OAuthServer = require('express-oauth-server');
-var router = express.Router();
+let express = require('express');
+let oauth_model = require('../../utils/oauth');
+let OAuthServer = require('express-oauth-server');
+let router = express.Router();
 
 router.oauth = new OAuthServer({
     model: oauth_model
@@ -12,15 +12,16 @@ router.oauth = new OAuthServer({
 router.get('/authorize', function (req: any, res: any, next: any) {
     if (req.user === undefined) {
         req.flash('messages', 'Please login');
-        var redirect_uri: string = req.protocol + '://' + req.host + req.originalUrl;
-        res.redirect('/account/login?redirect=' + encodeURI(redirect_uri));
+        let redirect_uri: string = req.protocol + '://' + req.get('host') + req.originalUrl;
+        let decoded = decodeURIComponent(redirect_uri);
+        res.redirect('/account/login?redirect=' + encodeURIComponent(decoded));
         return;
     }
-    var client_id = req.query.client_id;
-    var redirect = req.query.redirect_uri;
+    let client_id = req.query.client_id;
+    let redirect = req.query.redirect_uri;
 
     get_client_from_id(client_id, client => {
-        var uris = client.redirectUris;
+        let uris = client.redirectUris;
         if (!uris.includes(redirect)) {
             res.redirect("/");
             return;
@@ -29,7 +30,7 @@ router.get('/authorize', function (req: any, res: any, next: any) {
         if (client.type === "built_in") {
             //generate code
             oauth_model.generateAuthorizationCode({id: client_id}, req.user, null, function (err: any, code: string) {
-                var date = new Date();
+                let date = new Date();
                 date.setDate(date.getDate() + 1);
                 oauth_model.saveAuthorizationCode({authorizationCode: code, expiresAt: date.toISOString().slice(0, 19).replace('T', ' '), redirectUri: redirect}, {id: client_id}, {id: req.user.id}, function () {
                     res.redirect(redirect + '?code=' + code);
@@ -56,11 +57,11 @@ router.get("/", function (req: any, res: any) {
 
 function get_client_from_id(clientId: string, callback: (client: any) => void) {
     // @ts-ignore
-    var builtInClients: { id: string, callback: string, secret: string }[] = global.config.site_oauth_secrets;
-    for (var i = 0; i < builtInClients.length; i++) {
-        var builtInClient: { id: string, callback: string, secret: string } = builtInClients[i];
+    let builtInClients: { id: string, callback: string, secret: string }[] = global.config.site_oauth_secrets;
+    for (let i = 0; i < builtInClients.length; i++) {
+        let builtInClient: { id: string, callback: string, secret: string } = builtInClients[i];
         if (builtInClient.id === clientId) {
-            var uris = [builtInClient.callback];
+            let uris = [builtInClient.callback];
             callback({
                 "id": clientId,
                 "redirectUris": uris,
