@@ -33,7 +33,11 @@ const model = {
                         "accessToken": token,
                         "accessTokenExpiresAt": result.access_expire,
                         "client": {
-                            "id": result.client_id
+                            "id": result.client_id,
+                            "grants": [
+                                "refresh_token",
+                                "authorization_code"
+                            ]
                         },
                         "user": {
                             "id": result.user_id
@@ -139,7 +143,11 @@ const model = {
         let builtInClients: {id: string, callback: string, secret: string}[] = global.config.site_oauth_secrets;
         for (let i = 0; i < builtInClients.length; i++) {
             let builtInClient: {id: string, callback: string, secret: string} = builtInClients[i];
-            if (builtInClient.id === clientId && builtInClient.secret === clientSecret) {
+            if (builtInClient.id === clientId) {
+                if (clientSecret !== null && builtInClient.secret !== clientSecret) {
+                    callback(null, {});
+                    return;
+                }
                 let uris = [builtInClient.callback];
                 let client = {
                     "id": clientId,
@@ -161,8 +169,8 @@ const model = {
                 return;
             }
 
-            connection.query("SELECT * FROM oauth_clients WHERE client_id = ? AND client_secret = ?",
-                [clientId, clientSecret],
+            connection.query("SELECT * FROM oauth_clients WHERE client_id = ?",
+                [clientId],
                 function (err: any, results: any) {
                     if (err) {
                         connection.release();
@@ -174,6 +182,10 @@ const model = {
                     if (results.length == 0) {
                         callback(null, {});
                         return;
+                    }
+
+                    if (clientSecret !== null && results[0].client_secret !== clientSecret) {
+                        callback(null, {});
                     }
 
                     connection.query("SELECT uri FROM oauth_uris WHERE client_id = ?",

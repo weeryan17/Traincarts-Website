@@ -1,0 +1,19 @@
+type Query {
+    user: user
+}
+
+type user {
+    id: Int,
+    name: String,
+    email: String,
+    external_accounts: [ external_account ]
+}
+
+type external_profile {
+    id: String
+}
+
+type external_account {
+    type: String,
+    profile: external_profile
+}

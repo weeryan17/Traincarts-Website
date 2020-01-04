@@ -1,13 +1,10 @@
 // @ts-ignore
 let express = require('express');
-let oauth_model = require('../../utils/oauth');
-let OAuthServer = require('express-oauth-server');
 // @ts-ignore
 let router = express.Router();
 
-router.oauth = new OAuthServer({
-    model: oauth_model
-});
+// @ts-ignore
+let oauth_model = require('../../utils/oauth');
 
 // @ts-ignore
 router.get('/authorize', function (req: any, res: any, next: any) {
@@ -50,7 +47,8 @@ router.get('/authorize', function (req: any, res: any, next: any) {
     });
 });
 
-router.post('/token', router.oauth.token());
+// @ts-ignore
+router.post('/token', global.oauth.token());
 
 router.get("/", function (req: any, res: any) {
     res.send("wip")

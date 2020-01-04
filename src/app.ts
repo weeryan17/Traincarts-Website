@@ -12,6 +12,17 @@ let localStrategy = require("passport-local");
 let bcrypt = require('bcrypt');
 let discordStrategy = require('passport-discord').Strategy;
 
+let redisCache = require('express-redis-cache');
+
+// @ts-ignore
+let oauth_model = require('./utils/oauth');
+let OAuthServer = require('express-oauth-server');
+// @ts-ignore
+global["oauth"] = new OAuthServer({
+    model: oauth_model,
+    useErrorHandler: true
+});
+
 passport.serializeUser(function(user : any, done : any) {
     done(null, user);
 });
@@ -104,6 +115,13 @@ let redisClient = redis.createClient(global.config.redis);
 redisClient.on("error", function (err: any) {
     console.error(err);
 });
+
+let cache = redisCache({
+    client: redisClient
+});
+
+// @ts-ignore
+global["cache"] = cache;
 
 let session = require('express-session');
 let redisStore = require('connect-redis')(session);
