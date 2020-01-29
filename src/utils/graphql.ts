@@ -21,7 +21,7 @@ function createConnection() {
     });
 }
 
-function createQuery(connection: any, query: string, params: any[]) {
+function query(connection: any, query: string, params: any[]) {
 
     return new Promise((succeed: any, fail: any) => {
 
@@ -39,12 +39,12 @@ function createQuery(connection: any, query: string, params: any[]) {
 let resolver = {
     user: async function (args: any, request: any) {
         let connection: any = await createConnection();
-        let user_results: any = await createQuery(connection, "SELECT username, email FROM traincarts_users WHERE id = ?", [request.app.locals.user_id]);
+        let user_results: any = await query(connection, "SELECT username, email FROM traincarts_users WHERE id = ?", [request.app.locals.user_id]);
         if (user_results.length == 0) {
             return {};
         }
 
-        let accounts_result: any = await createQuery(connection, "SELECT external_account_id as 'id', account_type as 'type' FROM user_accounts as uc INNER JOIN external_accounts ea on uc.account_id = ea.account_id WHERE user_id = ?", [request.app.locals.user_id]);
+        let accounts_result: any = await query(connection, "SELECT external_account_id as 'id', account_type as 'type' FROM user_accounts as uc INNER JOIN external_accounts ea on uc.account_id = ea.account_id WHERE user_id = ?", [request.app.locals.user_id]);
         let accounts: { type: string, profile: { id: string } }[] = [];
         for (let i = 0; i < accounts_result.length; i++) {
             let account_result = accounts_result[i];

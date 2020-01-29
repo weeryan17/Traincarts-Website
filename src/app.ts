@@ -20,7 +20,8 @@ let OAuthServer = require('express-oauth-server');
 // @ts-ignore
 global["oauth"] = new OAuthServer({
     model: oauth_model,
-    useErrorHandler: true
+    useErrorHandler: true,
+    accessTokenLifetime: 60 * 60 * 24
 });
 
 passport.serializeUser(function(user : any, done : any) {
@@ -112,6 +113,10 @@ let redis = require('redis');
 // @ts-ignore
 let redisClient = redis.createClient(global.config.redis);
 
+redisClient.on("connect", function () {
+    console.log("Redis connected");
+});
+
 redisClient.on("error", function (err: any) {
     console.error(err);
 });
@@ -128,7 +133,8 @@ let redisStore = require('connect-redis')(session);
 
 app.use(session({
     store: new redisStore({client: redisClient}),
-    secret: config.session.secret
+    secret: config.session.secret,
+    resave: false
 }));
 
 app.use(flash());

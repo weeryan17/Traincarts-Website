@@ -121,6 +121,7 @@ router.post("/login", recaptcha.middleware.verify, function (req: any, res: any,
                 }
 
                 if (results.length == 0) {
+                    connection.release();
                     authenticate(req, res, next);
                     return;
                 }
