@@ -93,6 +93,7 @@ function get_client_from_id(clientId: string, callback: (client: any) => void) {
                 }
 
                 if (results.length == 0) {
+                    connection.release();
                     callback(null);
                     return;
                 }

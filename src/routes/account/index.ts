@@ -103,6 +103,7 @@ router.post("/login", recaptcha.middleware.verify, function (req: any, res: any,
             }
 
             if (results.length == 0) {
+                connection.release();
                 req.flash('error', "Incorrect username/email");
                 res.redirect('/account/login?redirect=' + encodeURIComponent(req.query.redirect));
                 return;
@@ -127,6 +128,7 @@ router.post("/login", recaptcha.middleware.verify, function (req: any, res: any,
                 }
 
                 if (req.body.twofa_code === undefined) {
+                    connection.release();
                     let error: boolean | string = false;
                     let flash: string[] = req.flash('error');
                     if (flash.length > 0) {
@@ -159,6 +161,7 @@ router.post("/login", recaptcha.middleware.verify, function (req: any, res: any,
                             }
                         }
                         if (!is_backup) {
+                            connection.release();
                             req.flash('error', "Invalid 2fa code");
                             res.redirect('/account/login?redirect=' + encodeURIComponent(req.query.redirect));
                             return;
@@ -334,6 +337,7 @@ router.put('/forgot', function (req: any, res: any, next: any) {
                 }
 
                 if (results.length == 0) {
+                    connection.release();
                     res.json({error: "Email not found"});
                     return;
                 }
@@ -393,12 +397,14 @@ router.post('/password', function (req: any, res: any, next: any) {
                 }
 
                 if (results.length == 0) {
+                    connection.release();
                     req.flash('error', 'Why?');
                     res.redirect('/account/login?redirect=' + encodeURIComponent(req.query.redirect));
                     return;
                 }
 
                 if (results[0].recovery_key != req.body.key) {
+                    connection.release();
                     req.flash('error', 'Invalid recovery key');
                     res.redirect('/account/login?redirect=' + encodeURIComponent(req.query.redirect));
                     return;
@@ -406,6 +412,7 @@ router.post('/password', function (req: any, res: any, next: any) {
 
                 bcrypt.hash(req.body.password, 10, function (err: any, hash: string) {
                     if (err) {
+                        connection.release();
                         console.error(err);
                         req.app.locals.error = err;
                         req.app.locals.message = "Error while resetting password";
@@ -461,6 +468,7 @@ router.post("/signup", recaptcha.middleware.verify, function (req: any, res: any
 
         bcrypt.hash(password, 10, function (err: any, hash: string) {
             if (err) {
+                connection.release();
                 console.error(err);
                 req.app.locals.error = err;
                 req.app.locals.message = "Error while creating account";
@@ -530,6 +538,7 @@ router.post("/signup", recaptcha.middleware.verify, function (req: any, res: any
                                 return;
                             });
                         }
+                        connection.release();
 
                         req.flash('messages', 'Check your email in order to activate your account');
                         res.redirect('/');
@@ -755,6 +764,7 @@ router.get('/discord/callback', function (req: any, res: any, next: any) {
                 next();
                 return;
             }
+            connection.release();
             res.redirect('/account');
         });
     })(req, res, next);

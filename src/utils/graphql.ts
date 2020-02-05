@@ -45,6 +45,7 @@ let resolver = {
         }
 
         let accounts_result: any = await query(connection, "SELECT external_account_id as 'id', account_type as 'type' FROM user_accounts as uc INNER JOIN external_accounts ea on uc.account_id = ea.account_id WHERE user_id = ?", [request.app.locals.user_id]);
+        connection.release();
         let accounts: { type: string, profile: { id: string } }[] = [];
         for (let i = 0; i < accounts_result.length; i++) {
             let account_result = accounts_result[i];

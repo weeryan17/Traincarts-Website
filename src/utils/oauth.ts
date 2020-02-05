@@ -180,11 +180,13 @@ const model = {
                     }
 
                     if (results.length == 0) {
+                        connection.release();
                         callback(null, {});
                         return;
                     }
 
                     if (clientSecret !== null && results[0].client_secret !== clientSecret) {
+                        connection.release();
                         callback(null, {});
                     }
 

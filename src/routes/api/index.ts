@@ -37,7 +37,7 @@ router.get('/user', global.oauth.authenticate(),
             connection.query("SELECT user_id FROM oauth_tokens WHERE access_token = ?",
                 [token.accessToken],
                 function (err: any, results: any) {
-                connection.release();
+                    connection.release();
                     if (err) {
                         console.error(err);
                         res.sendStatus(500);
