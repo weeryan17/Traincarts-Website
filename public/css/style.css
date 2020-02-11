@@ -3,6 +3,14 @@ body {
     color: rgb(200, 200, 200);
 }
 
+.editor-toolbar a {
+    color: rgb(200, 200, 200) !important;
+}
+
+.cm-s-paper {
+    background: rgb(107, 115, 244);
+}
+
 .ts-primary {
     background-color: rgb(97, 57, 179);
 }

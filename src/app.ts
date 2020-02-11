@@ -219,8 +219,6 @@ app.use(function (req: any, res: any) {
         }
     }
 
-    // render the error page
-    res.sendStatus(req.app.locals.status);
     res.render('error', {title: 'Error', messages: req.messages, error: error});
 });
 
