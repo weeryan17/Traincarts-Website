@@ -1,4 +1,10 @@
 $(document).ready(function () {
+    new SimpleBar($(".container")[0], {autoHide: false});
+
+    $(".ts-popover").popover({
+        trigger: 'hover'
+    });
+
     $("*[data-elmlink]").click(function (e) {
         var elm = $(e.currentTarget);
         console.log(elm.attr("data-elmlink"));
@@ -9,10 +15,10 @@ $(document).ready(function () {
         //TODO improve this so it creates the ts-text element without me needing to make it myself
         var originalText = this.find(".ts-text").text();
         var chars = originalText.length + newText.length;
-        var timeInterval = time/chars;
+        var timeInterval = time / chars;
         var originalSize = originalText.length;
         var newSize = 0;
-        var nextTextParts = newText.substr(0,1);
+        var nextTextParts = newText.substr(0, 1);
         this.append("<span class='ts-text-bar'>|</span>");
         var elm = this;
         var interval = window.setInterval(function () {
@@ -24,7 +30,7 @@ $(document).ready(function () {
                 newSize++;
                 elm.find(".ts-text").text(nextTextParts);
                 nextTextParts += newText.substr(newSize, 1);
-            } else{
+            } else {
                 elm.find(".ts-text-bar").remove();
                 clearInterval(interval);
             }
@@ -51,6 +57,12 @@ $(document).ready(function () {
     window.setTimeout(function () {
         $("#alerts").hide(500);
     }, 5000);
+
+    window.setInterval(function () {
+        console.log('interval');
+        var containerHeight = $(window).height() - $("header").height();
+        $(".container").attr('style', 'height: ' + containerHeight + 'px !important;')
+    }, 0, 500);
 });
 
 function checkInputMatches(input, id, message) {

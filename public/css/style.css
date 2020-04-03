@@ -1,6 +1,40 @@
+html {
+    height: 100% !important;
+}
+
 body {
     background: rgb(50, 50, 50);
     color: rgb(200, 200, 200);
+    height: 100% !important;
+}
+
+.popover {
+    background: rgb(50, 50, 50) !important;
+    color: rgb(200, 200, 200) !important;
+    border-color: rgb(200, 200, 200) !important;
+}
+
+/*.container {
+    height: calc(100% - 80px);
+}*/
+
+.simplebar-track {
+    background-color: #606060;
+}
+
+.simplebar-scrollbar {
+    background-color: rgb(107, 115, 244);
+    color: rgba(0,0,0,0);
+}
+
+.popover-header {
+    background: rgb(50, 50, 50) !important;
+    color: rgb(200, 200, 200) !important;
+}
+
+.popover-body {
+    background: rgb(50, 50, 50) !important;
+    color: rgb(200, 200, 200) !important;
 }
 
 .editor-toolbar a {
@@ -86,6 +120,14 @@ body {
   animation-name: ts-text-bar-a;
   animation-duration: .5s;
   animation-iteration-count: infinite;
+}
+
+.ts-file-input {
+    position: absolute;
+    font-size: 50px;
+    opacity: 0;
+    right: 0;
+    top: 0;
 }
 
 .dropdown-menu {
